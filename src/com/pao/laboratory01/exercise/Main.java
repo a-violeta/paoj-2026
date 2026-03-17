@@ -41,12 +41,13 @@ public class Main {
                     carService.addCar(new Car(name, color));
                     break;
                 case 3:
-                    // TODO: Implementează adăugare review
-                    // Pași:
-                    // 1. Citește numele mașinii de la tastatură (scanner.next())
-                    // 2. Citește textul review-ului (scanner.next())
-                    // 3. Apelează carService.addReview(carName, review)
-                    System.out.println("TODO — implementează adăugare review");
+                    System.out.print("Numele mașinii: ");
+                    String carName = scanner.next();
+
+                    System.out.print("Review: ");
+                    String review = scanner.next();
+
+                    carService.addReview(carName, review);
                     break;
                 case 0:
                     System.out.println("La revedere!");
