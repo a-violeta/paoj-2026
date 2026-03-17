@@ -85,22 +85,16 @@ public class CarService {
 
             if (cars[i].getName().equals(carName)) {
 
-                // 1. Luăm array-ul curent de review-uri
                 String[] oldReviews = cars[i].getReviews();
 
-                // 2. Creăm un array nou cu un element în plus
                 String[] newReviews = new String[oldReviews.length + 1];
 
-                // 3. Copiem review-urile vechi
                 System.arraycopy(oldReviews, 0, newReviews, 0, oldReviews.length);
 
-                // 4. Adăugăm review-ul nou
                 newReviews[newReviews.length - 1] = review;
 
-                // 5. Setăm array-ul actualizat în obiectul Car
                 cars[i].setReviews(newReviews);
 
-                // 6. Confirmare
                 System.out.println("Review adăugat pentru mașina \"" + carName + "\".");
                 return;
             }
