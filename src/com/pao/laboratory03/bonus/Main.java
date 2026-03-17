@@ -1,5 +1,12 @@
 package com.pao.laboratory03.bonus;
 
+import com.pao.laboratory03.bonus.enums.Priority;
+import com.pao.laboratory03.bonus.enums.Status;
+import com.pao.laboratory03.bonus.exception.InvalidTransitionException;
+import com.pao.laboratory03.bonus.exception.TaskNotFoundException;
+import com.pao.laboratory03.bonus.model.Task;
+import com.pao.laboratory03.bonus.service.TaskService;
+
 /**
  * Exercițiul 5 (Bonus) — Sistem de gestiune task-uri cu audit log
  *
@@ -153,12 +160,84 @@ package com.pao.laboratory03.bonus;
  * === Excepții ===
  * TaskNotFoundException: Task-ul 'T999' nu a fost găsit
  */
+
+
+
 public class Main {
     public static void main(String[] args) {
-        // TODO: implementează toți cei 10 pași de mai sus
-        // Creează TOATE clasele necesare în acest pachet (bonus/)
-        // Nu ai subpachete impuse — organizează cum consideri
+
+        TaskService service = TaskService.getInstance();
+
+        System.out.println("=== Adaugare task-uri ===");
+
+        Task t1 = service.addTask("Fix login bug", Priority.CRITICAL);
+        Task t2 = service.addTask("Add dark mode", Priority.LOW);
+        Task t3 = service.addTask("Update docs", Priority.MEDIUM);
+        Task t4 = service.addTask("Fix memory leak", Priority.HIGH);
+        Task t5 = service.addTask("Refactor DB layer", Priority.HIGH);
+
+        System.out.println(t1);
+        System.out.println(t2);
+        System.out.println(t3);
+        System.out.println(t4);
+        System.out.println(t5);
+
+        System.out.println("\n=== Asignare ===");
+
+        service.assignTask(t1.getId(), "Ana");
+        System.out.println(t1.getId() + " -> Ana");
+
+        service.assignTask(t3.getId(), "Mihai");
+        System.out.println(t3.getId() + " -> Mihai");
+
+        service.assignTask(t4.getId(), "Elena");
+        System.out.println(t4.getId() + " -> Elena");
+
+        System.out.println("\n=== Schimbari status ===");
+
+        try {
+            System.out.print(t1.getId() + ": " + t1.getStatus() + " -> IN_PROGRESS ");
+            service.changeStatus(t1.getId(), Status.IN_PROGRESS);
+            System.out.println("✓");
+
+            System.out.print(t1.getId() + ": " + t1.getStatus() + " -> DONE ");
+            service.changeStatus(t1.getId(), Status.DONE);
+            System.out.println("✓");
+
+            System.out.print(t3.getId() + ": " + t3.getStatus() + " -> IN_PROGRESS ");
+            service.changeStatus(t3.getId(), Status.IN_PROGRESS);
+            System.out.println("✓");
+
+            // tranzitie invalida
+            System.out.print(t1.getId() + ": " + t1.getStatus() + " -> TODO ");
+            service.changeStatus(t1.getId(), Status.TODO);
+            System.out.println("✓"); // nu ajunge aici
+
+        } catch (InvalidTransitionException e) {
+            System.out.println("-> " + e.getMessage());
+        }
+
+        System.out.println("\n=== Task-uri HIGH ===");
+        service.getTasksByPriority(Priority.HIGH).forEach(System.out::println);
+
+        System.out.println("\n=== Sumar status ===");
+        service.getStatusSummary().forEach((k, v) ->
+                System.out.println(k + ": " + v));
+
+        System.out.println("\n=== Task-uri neasignate ===");
+        service.getUnassignedTasks().forEach(System.out::println);
+
+        System.out.println("\n=== Scor urgenta ===");
+        System.out.println(service.getTotalUrgencyScore(5));
+
+        System.out.println("\n=== Audit Log ===");
+        service.printAuditLog();
+
+        System.out.println("\n=== Exceptii ===");
+        try {
+            service.assignTask("T999", "Test");
+        } catch (TaskNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
-
-

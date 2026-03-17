@@ -48,9 +48,48 @@ package com.pao.laboratory03.collections;
  * Studenți la PAOJ: [Ana, Mihai, Ion]
  * Studenți la BD (actualizat): [Ana, Elena, George]
  */
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 public class Main {
     public static void main(String[] args) {
-        // TODO: implementează cele 3 părți de mai sus
+        System.out.println("=== PARTEA A: HashMap — frecvența cuvintelor ===");
+        String[] words = new String[]{"java", "python", "java", "c++", "python", "java", "rust", "c++", "go"};
+        Map<String, Integer> freq = new HashMap();
+
+        for(String w : words) {
+            freq.put(w, (Integer)freq.getOrDefault(w, 0) + 1);
+        }
+
+        System.out.println("Frecventa: " + String.valueOf(freq));
+        System.out.println("Contine 'rust'? " + freq.containsKey("rust"));
+        System.out.println("Chei: " + String.valueOf(freq.keySet()));
+        System.out.println("Valori: " + String.valueOf(freq.values()));
+
+        for(Map.Entry<String, Integer> entry : freq.entrySet()) {
+            PrintStream var10000 = System.out;
+            String var10001 = (String)entry.getKey();
+            var10000.println(var10001 + " -> " + String.valueOf(entry.getValue()));
+        }
+
+        System.out.println("\n=== PARTEA B: TreeMap — sortare automata ===");
+        TreeMap<String, Integer> sorted = new TreeMap(freq);
+        System.out.println("Sortat: " + String.valueOf(sorted));
+        System.out.println("Prima cheie: " + (String)sorted.firstKey());
+        System.out.println("Ultima cheie: " + (String)sorted.lastKey());
+        System.out.println("\n=== PARTEA C: Map cu obiecte ===");
+        Map<String, List<String>> students = new HashMap();
+        students.put("PAOJ", new ArrayList(Arrays.asList("Ana", "Mihai", "Ion")));
+        students.put("BD", new ArrayList(Arrays.asList("Ana", "Elena")));
+        System.out.println("Studenti la PAOJ: " + String.valueOf(students.get("PAOJ")));
+        ((List)students.get("BD")).add("George");
+        System.out.println("Studenti la BD (actualizat): " + String.valueOf(students.get("BD")));
     }
 }
 
