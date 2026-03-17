@@ -19,21 +19,12 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        int n;
-        int[] array;
-        n = scanner.nextInt(); // scannerul citeste primitive
-        // declaram un array de lungimea n
-        array = new int[n];
-        for (int i = 0; i < n; i++) {
-            array[i] = scanner.nextInt();
-        }
-        // afisam elementele array-ului
-        for (int num : array) {
-            System.out.println(num);
-        }
-        // afisam din nou elementele, folosind indici si campul length
-        for (int i = 0; i < array.length; i++) {
-            System.out.println(array[i]);
-        }
+        System.out.println("=== Exercitiul 1 ===");
+        MediaAritmetica.rezolva(scanner);
+
+        System.out.println("\n=== Exercitiul 2 ===");
+        DiagonaleleMatricei.rezolva(scanner);
+
+        scanner.close();
     }
 }
