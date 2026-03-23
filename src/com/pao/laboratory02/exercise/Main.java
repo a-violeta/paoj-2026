@@ -16,7 +16,7 @@ import java.util.Scanner;
  */
 public class Main {
     public static void main(String[] args) {
-        CarService carService = CarService.getInstance();
+        com.pao.laboratory01.exercise.CarService carService = com.pao.laboratory01.exercise.CarService.getInstance();
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -38,7 +38,7 @@ public class Main {
                     String name = scanner.next();
                     System.out.print("Introdu culoarea: ");
                     String color = scanner.next();
-                    carService.addCar(new Car(name, color));
+                    //carService.addCar(new Car(name, color));
                     break;
                 case 3:
                     // TODO: Implementează adăugare review
