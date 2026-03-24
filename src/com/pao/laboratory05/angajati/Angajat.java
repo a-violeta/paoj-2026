@@ -24,9 +24,15 @@ public class Angajat implements Comparable<Angajat>{
     }
 
     @Override
-    public String toString(){
-        return "Angajat{nume='...', departament=Departament[nume=..., locatie=...], salariu=...}";
+    public String toString() {
+        return String.format(
+                "Angajat{nume='%s', departament=%s, salariu=%.2f}",
+                nume,
+                departament,
+                salariu
+        );
     }
+
 
     @Override
     public int compareTo(Angajat o) {

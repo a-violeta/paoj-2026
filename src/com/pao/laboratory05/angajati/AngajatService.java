@@ -45,8 +45,19 @@ public class AngajatService {
         }
     }
 
-    void findByDepartament(String numeDept){
-        //parcurge array-ul, afișează toți angajații al căror angajat.getDepartament().nume().equalsIgnoreCase(numeDept);
-        //dacă nu găsește niciun angajat, afișează "Niciun angajat în departamentul: <numeDept>"
+    void findByDepartament(String numeDept) {
+        boolean found = false;
+
+        for (Angajat a : angajati) {
+            if (a.getDepartament().nume().equalsIgnoreCase(numeDept)) {
+                System.out.println(a);
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("Niciun angajat în departamentul: " + numeDept);
+        }
     }
+
 }
