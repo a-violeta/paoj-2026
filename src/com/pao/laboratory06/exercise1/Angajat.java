@@ -19,7 +19,7 @@ public class Angajat {
 
     @Override
     public String toString() {
-        return String.format("%s %.1f", nume, salariu);
+        return String.format(java.util.Locale.US, "%s %.1f", nume, salariu);
     }
 
     public String getNume() {
