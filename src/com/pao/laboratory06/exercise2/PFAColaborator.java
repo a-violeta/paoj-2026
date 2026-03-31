@@ -1,36 +1,14 @@
 package com.pao.laboratory06.exercise2;
 
+import java.util.Locale;
 import java.util.Scanner;
 
 public class PFAColaborator extends PersoanaFizica {
 
     private double cheltuieliLunare;
-
-    public PFAColaborator(){}
-
-    public PFAColaborator(String nume, String prenume, double venit_brut_lunar, double cheltuileiLunare) {
-        super(nume, prenume, venit_brut_lunar);
-        this.cheltuieliLunare=cheltuileiLunare;
-    }
+    private static final double SALARIU_MINIM_ANUAL = 4050 * 12;
 
     @Override
-    public double calculeazaVenitNetAnual() {
-        //PFA: (toate sumele sunt anuale):
-        //venit net = (venit lunar - cheltuieli lunare) × 12
-        //impozit pe venit: 10% × venit net
-        //CASS (sănătate, 10%):
-        //dacă venit net < 6 salarii minime brute/an: 10% × (6 × salariu minim brut)
-        //dacă venit net între 6 și 72 salarii minime brute/an: 10% × venit net
-        //dacă venit net > 72 salarii minime brute/an: 10% × (72 × salariu minim brut)
-        //CAS (pensie, 25%):
-        //dacă venit net < 12 salarii minime brute/an: nu se plătește
-        //dacă venit net între 12 și 24 salarii minime brute/an: 25% × (12 × salariu minim brut)
-        //dacă venit net > 24 salarii minime brute/an: 25% × (24 × salariu minim brut)
-        //venit net anual = venit net - impozit - CASS - CAS
-        return getVenitBrutLunar() * 12;
-    }
-
-    //@Override
     public void citeste(Scanner in) {
         nume = in.next();
         prenume = in.next();
@@ -38,13 +16,46 @@ public class PFAColaborator extends PersoanaFizica {
         cheltuieliLunare = in.nextDouble();
     }
 
-    //@Override
+    @Override
     public void afiseaza() {
-        System.out.printf("%s %s %.1f %.1f%n", nume, prenume, venitBrutLunar, cheltuieliLunare);
+        System.out.printf(Locale.US,
+                "PFA: %s %s, venit net anual: %.2f lei%n",
+                nume, prenume, calculeazaVenitNetAnual());
     }
 
-    //@Override
+    @Override
+    public TipColaborator getTip() {
+        return TipColaborator.PFA;
+    }
+
+    @Override
+    public double calculeazaVenitNetAnual() {
+        double venitNet = (venitBrutLunar - cheltuieliLunare) * 12;
+
+        double impozit = 0.10 * venitNet;
+
+        double cass;
+        if (venitNet < 6 * SALARIU_MINIM_ANUAL)
+            cass = 0.10 * (6 * SALARIU_MINIM_ANUAL);
+        else if (venitNet <= 72 * SALARIU_MINIM_ANUAL)
+            cass = 0.10 * venitNet;
+        else
+            cass = 0.10 * (72 * SALARIU_MINIM_ANUAL);
+
+        double cas;
+        if (venitNet < 12 * SALARIU_MINIM_ANUAL)
+            cas = 0;
+        else if (venitNet <= 24 * SALARIU_MINIM_ANUAL)
+            cas = 0.25 * (12 * SALARIU_MINIM_ANUAL);
+        else
+            cas = 0.25 * (24 * SALARIU_MINIM_ANUAL);
+
+        return venitNet - impozit - cass - cas;
+    }
+
+    @Override
     public String tipContract() {
         return "PFA";
     }
+
 }

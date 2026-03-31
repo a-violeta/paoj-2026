@@ -1,22 +1,13 @@
 package com.pao.laboratory06.exercise2;
 
+import java.util.Locale;
 import java.util.Scanner;
 
 public class SRLColaborator extends PersoanaJuridica {
 
     private double cheltuieliLunare;
 
-    public SRLColaborator(String nume, String prenume, double venit_brut_lunar, double cheltuieliLunare) {
-        super(nume, prenume, venit_brut_lunar);
-        this.cheltuieliLunare=cheltuieliLunare;
-    }
-
     @Override
-    public double calculeazaVenitNetAnual() {
-        return getVenitBrutLunar() * 12;
-    }
-
-    //@Override
     public void citeste(Scanner in) {
         nume = in.next();
         prenume = in.next();
@@ -24,13 +15,26 @@ public class SRLColaborator extends PersoanaJuridica {
         cheltuieliLunare = in.nextDouble();
     }
 
-    //@Override
+    @Override
     public void afiseaza() {
-        System.out.printf("%s %s %.1f %.1f%n", nume, prenume, venitBrutLunar, cheltuieliLunare);
+        System.out.printf(Locale.US,
+                "SRL: %s %s, venit net anual: %.2f lei%n",
+                nume, prenume, calculeazaVenitNetAnual());
     }
 
-    //@Override
+    @Override
+    public TipColaborator getTip() {
+        return TipColaborator.SRL;
+    }
+
+    @Override
+    public double calculeazaVenitNetAnual() {
+        return (venitBrutLunar - cheltuieliLunare) * 12 * 0.84;
+    }
+
+    @Override
     public String tipContract() {
         return "SRL";
     }
+
 }

@@ -1,50 +1,52 @@
 package com.pao.laboratory06.exercise2;
 
+import java.util.Locale;
 import java.util.Scanner;
 
-public class CIMColaborator extends PersoanaFizica{
+public class CIMColaborator extends PersoanaFizica {
 
-    private boolean bonus=false;
+    private boolean bonus = false;
 
-    public CIMColaborator(){}
+    @Override
+    public void citeste(Scanner in) {
+        // Main a citit deja "CIM"
+        nume = in.next();
+        prenume = in.next();
+        venitBrutLunar = in.nextDouble();
 
-    public CIMColaborator(String nume, String prenume, double venit_brut_lunar, boolean bonus) {
-        super(nume, prenume, venit_brut_lunar);
-        this.bonus=bonus;
+        if (in.hasNext()) {
+            String token = in.next();
+            if (token.equalsIgnoreCase("DA")) bonus = true;
+        }
     }
 
-    public boolean getBonus(){
+    @Override
+    public void afiseaza() {
+        System.out.printf(Locale.US,
+                "CIM: %s %s, venit net anual: %.2f lei%n",
+                nume, prenume, calculeazaVenitNetAnual());
+    }
+
+    @Override
+    public TipColaborator getTip() {
+        return TipColaborator.CIM;
+    }
+
+    @Override
+    public boolean areBonus() {
         return bonus;
     }
 
     @Override
     public double calculeazaVenitNetAnual() {
-        double venit = getVenitBrutLunar() * 12 * 0.55;
-        if (getBonus())
-            venit = venit * 1.1;
-        return venit;
+        double net = venitBrutAnual() * 0.55;
+        if (bonus) net *= 1.10;
+        return net;
     }
 
-    //@Override
-    public void citeste(Scanner in) {
-        nume = in.next();
-        prenume = in.next();
-        venitBrutLunar = in.nextDouble();
-        bonus = in.nextBoolean();
-    }
-
-    //@Override
-    public void afiseaza() {
-        System.out.printf("%s %s %.1f %b%n", nume, prenume, venitBrutLunar, bonus);
-    }
-
-    //@Override
+    @Override
     public String tipContract() {
         return "CIM";
     }
 
-    //@Override
-    public boolean areBonus() {
-        return bonus;
-    }
 }

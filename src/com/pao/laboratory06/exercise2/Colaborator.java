@@ -1,28 +1,23 @@
 package com.pao.laboratory06.exercise2;
 
-public abstract class Colaborator {
+public abstract class Colaborator implements IOperatiiCitireScriere {
     protected String nume;
     protected String prenume;
     protected double venitBrutLunar;
 
-    public Colaborator(String nume, String prenume, double venit_brut_lunar){
-        this.nume=nume;
-        this.prenume=prenume;
-        this.venitBrutLunar=venit_brut_lunar;
+    public Colaborator() {
     }
 
-    public double getVenitBrutLunar(){
-        return this.venitBrutLunar;
+    public Colaborator(String nume, String prenume, double venitBrutLunar) {
+        this.nume = nume;
+        this.prenume = prenume;
+        this.venitBrutLunar = venitBrutLunar;
     }
 
-    public String getNume(){
-        return this.nume;
-    }
-
-    public String getPrenume(){
-        return this.prenume;
-    }
-
+    public abstract TipColaborator getTip();
     public abstract double calculeazaVenitNetAnual();
-    //Creează subclase pentru fiecare tip: CIMColaborator, PFAColaborator, SRLColaborator
+
+    protected double venitBrutAnual() {
+        return venitBrutLunar * 12;
+    }
 }
