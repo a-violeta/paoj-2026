@@ -17,7 +17,7 @@ public class Main {
         // citește pragul din stdin
         Scanner sc = new Scanner(System.in);
         if (!sc.hasNextInt()) {
-            return; // daca nu e input, nu crapa
+            return; // daca nu e input, nu crapa programul
         }
         int prag = sc.nextInt();
 
