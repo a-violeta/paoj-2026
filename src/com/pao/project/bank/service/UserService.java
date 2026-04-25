@@ -42,7 +42,7 @@ public class UserService {
     }
 
     public User findUserById(String id){
-        if(id.isBlank() || id.isEmpty()) return null;
+        if (id == null || id.isBlank()) return null;
 
         for (User u: users){
             if (u.getId().equals(id)) {

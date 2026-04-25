@@ -185,7 +185,7 @@ public class TransactionService {
 
         if (t == null) return false;
 
-        //delete from account transactionhistory
+        //delete from account transactionHistory
         Account from = t.getSourceAccount();
         Account to = t.getDestinationAccount();
         if (from != null) {
@@ -195,7 +195,7 @@ public class TransactionService {
             to.getTransactionHistory().remove(t);
         }
 
-        //delete from transactionservice list
+        //delete from transactionService list
         transactions.remove(t);
 
         return true;

@@ -1,5 +1,7 @@
 package com.pao.project.bank.model.account;
 
+import com.pao.project.bank.exception.IllegalCurrencyException;
+import com.pao.project.bank.exception.InactiveAccountException;
 import com.pao.project.bank.model.Currency;
 import com.pao.project.bank.model.CurrencyConverter;
 import com.pao.project.bank.model.User;
@@ -15,9 +17,9 @@ public abstract class Account implements Comparable<Account> {
 
     protected String iban;
     private double balance;
-    private User owner;
+    private final User owner;
     protected Currency currency;
-    private List<Transaction> transactionHistory;
+    private final List<Transaction> transactionHistory;
     protected LocalDateTime createdAt;
     private boolean active = true;
 
@@ -66,12 +68,10 @@ public abstract class Account implements Comparable<Account> {
             throw new IllegalArgumentException("Currency cannot be null.");
         }
         if (!active){
-            System.out.println("⚠️ Account is not active.");
-            return;
+            throw new InactiveAccountException("⚠️ Account is not active.");
         }
         if (newCurrency == this.currency) {
-            System.out.println("⚠️ Account is already in " + newCurrency);
-            return;
+            throw new IllegalCurrencyException("⚠️ Account is already in " + newCurrency);
         }
 
         double newBalance = CurrencyConverter.convert(this.balance, this.currency, newCurrency);
@@ -146,7 +146,7 @@ public abstract class Account implements Comparable<Account> {
 
     @Override
     public int compareTo(Account other) {
-        return this.iban.toString().compareTo(other.iban.toString());
+        return this.iban.compareTo(other.iban);
     }
 }
 

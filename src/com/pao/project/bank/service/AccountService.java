@@ -57,7 +57,7 @@ public class AccountService {
         // delete account from owner
         account.getOwner().getAccounts().remove(account);
 
-        // and from accountservice list
+        // and from accountService list
         accounts.remove(account);
         accountsByIban.remove(account.getIban());
 
@@ -92,15 +92,17 @@ public class AccountService {
 
     public void changeInterestRate(SavingsAccount account, double newRate) {
         if(account == null) return;
+        if(newRate <= 0 || newRate >= 0.3)
+            throw new IllegalArgumentException("⚠️ New interest rate not accepted.");
+
         account.setInterestRate(newRate);
     }
 
-    //public void changeOverdraftLimit(CheckingAccount account, double newLimit) {
-    //account.setOverdraftLimit(newLimit);
-    //}
-
     public void changeLoanInterest(LoanAccount account, double newRate) {
         if(account == null) return;
+        if(newRate <= 0 || newRate >= 0.3)
+            throw new IllegalArgumentException("⚠️ New interest rate not accepted.");
+
         account.setInterestRate(newRate);
     }
 }

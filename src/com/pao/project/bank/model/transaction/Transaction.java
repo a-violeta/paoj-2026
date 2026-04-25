@@ -7,11 +7,11 @@ import java.util.UUID;
 
 public abstract class Transaction {
 
-    private String id;
+    private final String id;
     protected LocalDateTime timestamp;
-    private double amount;
-    private Account sourceAccount;
-    private Account destinationAccount;
+    private final double amount;
+    private final Account sourceAccount;
+    private final Account destinationAccount;
     protected TransactionType type;
 
     public Transaction(double amount, Account sourceAccount, Account destinationAccount, TransactionType type) {

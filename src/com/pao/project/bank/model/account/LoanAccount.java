@@ -7,10 +7,10 @@ import java.time.LocalDate;
 
 public class LoanAccount extends Account {
 
-    private double loanAmount;
+    private final double loanAmount;
     private double remainingAmount;
     private double interestRate;
-    private LocalDate dueDate;
+    private final LocalDate dueDate;
 
     // Complete constructor
     public LoanAccount(User owner, Currency currency, double loanAmount, double interestRate, LocalDate dueDate) {

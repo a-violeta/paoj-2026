@@ -7,10 +7,10 @@ import java.util.Random;
 public class Card {
 
     private final ImmutableIdentifier cardNumber;      // 16 digits
-    private String cvv;             // 3 digits
-    private LocalDate expirationDate;
-    private User owner;
-    private Account account;
+    private final String cvv;             // 3 digits
+    private final LocalDate expirationDate;
+    private final User owner;
+    private final Account account;
     private boolean active;
     private CardType type;
 

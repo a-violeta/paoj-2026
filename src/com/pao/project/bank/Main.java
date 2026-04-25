@@ -1,5 +1,6 @@
 package com.pao.project.bank;
 
+import com.pao.project.bank.exception.IllegalCurrencyException;
 import com.pao.project.bank.exception.InactiveAccountException;
 import com.pao.project.bank.exception.NullAccountException;
 import com.pao.project.bank.model.*;
@@ -25,7 +26,7 @@ public class Main {
         AccountService accountService = AccountService.getInstance();
         CardService cardService = CardService.getInstance();
 
-        System.out.println("\nWelcome to " + bank.getName());
+        System.out.println("\nWelcome to: 💲 "+ bank.getName() + " 💲\n\nSWIFT Code: " + bank.getSwiftCode());
         System.out.println("\n🏦 💳 💰 🔐 🌍  📈  💼  🧾  🔄  🪙");
 
         while (true) {
@@ -114,7 +115,7 @@ public class Main {
                             System.out.println("Checking account created.");
                         }
                         case 3 -> {
-                            System.out.print("Loan amount: ");
+                            System.out.print("Loan amount (between 0 and 1000000): ");
                             double amount = scanner.nextDouble();
                             // not 0,00
                             if (amount <= 0) {
@@ -149,7 +150,6 @@ public class Main {
                         System.out.println(i+1 + ": " + users.get(i).getName());
                     }
                     int userIndex = scanner.nextInt();
-
                     if (userIndex < 1 || userIndex > users.size()) {
                         System.out.println("⚠️ Invalid user index!");
                         break;
@@ -163,7 +163,6 @@ public class Main {
                         break;
                     }
 
-                    // choose account
                     System.out.println("Choose account for the card:");
                     List<Account> accounts = owner.getAccounts();
                     for (int i = 0; i < accounts.size(); i++) {
@@ -194,11 +193,16 @@ public class Main {
                         }
                     };
 
-                    Card card = new Card(owner, chosenAccount, type);
-                    owner.addCard(card);
-                    cardService.addCard(card);
-
-                    System.out.println("Card created.");
+                    try{
+                        Card card = new Card(owner, chosenAccount, type);
+                        owner.addCard(card);
+                        cardService.addCard(card);
+                        System.out.println("Card created.");
+                    } catch (IllegalStateException e) {
+                        System.out.println("⚠️ Cannot create card: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("⚠️ Unexpected error: " + e.getMessage());
+                    }
                 }
 
                 case 4 -> {
@@ -217,14 +221,12 @@ public class Main {
                     System.out.println("=== ACCOUNTS ===");
 
                     List<Account> accounts = accountService.getAllAccounts();
-
                     if (accounts.isEmpty()){
                         System.out.println("⚠️ No accounts found. Create an account first.");
                         break;
                     }
 
                     Collections.sort(accounts);
-
                     for (Account a : accounts) {
                         System.out.println(a);
                     }
@@ -255,7 +257,6 @@ public class Main {
                     }
 
                     Account account = accounts.get(accIndex - 1);
-
                     List<Transaction> history = account.getTransactionHistory();
 
                     if (history.isEmpty()) {
@@ -293,8 +294,14 @@ public class Main {
                         break;
                     }
 
-                    transactionService.deposit(accounts.get(accIndex-1), amount);
-                    System.out.println("Deposit successful.");
+                    try {
+                        transactionService.deposit(accounts.get(accIndex - 1), amount);
+                        System.out.println("Deposit successful.");
+                    } catch (IllegalStateException e) {
+                        System.out.println("⚠️ Cannot create transaction: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("⚠️ Unexpected error: " + e.getMessage());
+                    }
                 }
 
                 case 9 -> {
@@ -321,8 +328,14 @@ public class Main {
                         break;
                     }
 
-                    transactionService.withdraw(accounts.get(accIndex-1), amount);
-                    System.out.println("Withdrawal successful.");
+                    try {
+                        transactionService.withdraw(accounts.get(accIndex - 1), amount);
+                        System.out.println("Withdrawal successful.");
+                    } catch (IllegalStateException e) {
+                        System.out.println("⚠️ Cannot create transaction: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("⚠️ Unexpected error: " + e.getMessage());
+                    }
                 }
 
                 case 10 -> {
@@ -356,8 +369,14 @@ public class Main {
                         break;
                     }
 
-                    transactionService.transfer(accounts.get(src-1), accounts.get(dst-1), amount);
-                    System.out.println("Transfer successful.");
+                    try {
+                        transactionService.transfer(accounts.get(src - 1), accounts.get(dst - 1), amount);
+                        System.out.println("Transfer successful.");
+                    } catch (IllegalStateException | IllegalArgumentException e) {
+                        System.out.println("⚠️ Cannot create transaction: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("⚠️ Unexpected error: " + e.getMessage());
+                    }
                 }
 
                 case 11 -> {
@@ -391,8 +410,14 @@ public class Main {
                         break;
                     }
 
-                    transactionService.internationalTransfer(accounts.get(src-1), accounts.get(dst-1), amount);
-                    System.out.println("International transfer successful.");
+                    try {
+                        transactionService.internationalTransfer(accounts.get(src - 1), accounts.get(dst - 1), amount);
+                        System.out.println("International transfer successful.");
+                    } catch (IllegalStateException | IllegalArgumentException e) {
+                        System.out.println("⚠️ Cannot create transaction: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("⚠️ Unexpected error: " + e.getMessage());
+                    }
                 }
 
                 case 12 -> {
@@ -414,11 +439,10 @@ public class Main {
 
                     try {
                         accountService.deactivateAccount(accounts.get(accIndex-1));
+                        System.out.println("Account deactivated.");
                     } catch (NullAccountException | InactiveAccountException e) {
                         System.out.println("⚠️ " + e.getMessage());
                     }
-
-                    System.out.println("Account deactivated.");
                 }
 
                 case 13 -> {
@@ -474,10 +498,15 @@ public class Main {
                     }
                     if (newCurrency == null) break;
 
-                    account.changeCurrency(newCurrency);
-
-                    System.out.println("✔ Currency successfully changed!");
-                    System.out.println("New balance: " + account.getBalance() + " " + newCurrency);
+                    try {
+                        account.changeCurrency(newCurrency);
+                        System.out.println("✔ Currency successfully changed!");
+                        System.out.println("New balance: " + account.getBalance() + " " + newCurrency);
+                    } catch (InactiveAccountException | IllegalCurrencyException e) {
+                        System.out.println("⚠️ Cannot change currency: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("⚠️ Unexpected error: " + e.getMessage());
+                    }
                 }
 
                 case 15 -> {

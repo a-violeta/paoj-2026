@@ -51,7 +51,6 @@ public class CardService {
 
     public void deactivateCard(Card card) {
         if(card == null) return;
-
         card.setActive(false);
     }
 

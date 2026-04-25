@@ -4,18 +4,18 @@ OOP project in Java for PAOJ class
 ## Description
 
 ### Actions
-1. list all accounts ordered by iban
+1. list all accounts ordered by IBAN
 2. list all cards
 3. list bank's users
 4. list transaction history
-4. deposit in account
-5. withdraw from account
-6. transfer from account to account
-7. international transfer
-7. deactivate account
-8. deactivate card
-9. change currency for account
-10. change interest rate for account
+5. deposit in account
+6. withdraw from account
+7. transfer from account to account
+8. international transfer
+9. deactivate account
+10. deactivate card
+11. change currency for account
+12. change interest rate for account
 
 ### Entities
 1. `Bank` singleton class
@@ -25,31 +25,31 @@ OOP project in Java for PAOJ class
 5. `LoanAccount` has a due date
 6. `CheckingAccount` has an overdraft limit
 7. `Transactions` are done to `Accounts` and can be one of 4 types: `Deposit`, `Withdrawal`, `Transfer`, `Deposit`
-9. `Deposit` involves 1 account
-10. `Withdrawal` involves 1 account
+8. `Deposit` involves 1 account
+9. `Withdrawal` involves 1 account
 10. `Transfer` involves 2 accounts
-11. `International Transfer` involves 2 accounts of different currencies
+11. `International Transfer` involves 2 accounts in different currencies
 12. `Card` is the object owned by a `User` and has a set `Currency`
 
 ### Notes about implementation
 
 Methods `toString()`, `equals()` and `hashCode()` cand be found in `Account` and `User` classes
 
-2-level inheriting: `Transaction` -> `Transfer` -> `InternationalTransfer`
+2-level inheriting: `Transaction` <- `Transfer` <- `InternationalTransfer`
 
 Abstract classes: `Account`, `Transaction`
 
 `ImmutableIdentifier` for `cardNumber` in `Card`
 
-Only 2 custom exceptions in `exceptions`: `InactiveAccountException`, `NullAccountException`
+3 custom exceptions in `exceptions`: `InactiveAccountException`, `NullAccountException`, `IllegalCurrencyException`
 
 Collections used:
 - `List` in: `Account`, `User`, `AccountService`, `CardService`, `TransactionService`, `UserService`
 - `Map` in: `AccountService`
 
-Sorted collection: `List<Account>` sorted in `Main` menu option `5`, using `Comllections.sort`
+Sorted collection: `List<Account>` sorted in `Main` menu option `5`, using `Collections.sort`
 
-4 singleton services classes: `AccountService`, `CardService`, `TransactionService`, `UserService` each implementing add, find, delete and list
+4 singleton services classes: `AccountService`, `CardService`, `TransactionService`, `UserService` each implementing add, find, delete and list, along with other methods
 
 `Main` has a menu with 15 options:
 1. `Create user`
