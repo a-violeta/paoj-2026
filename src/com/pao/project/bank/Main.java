@@ -104,13 +104,13 @@ public class Main {
                     switch (type) {
                         case 1 -> {
                             SavingsAccount sa = new SavingsAccount(owner, Currency.RON);
-                            owner.addAccount(sa);
+                            //owner.addAccount(sa);
                             accountService.addAccount(sa);
                             System.out.println("Savings account created.");
                         }
                         case 2 -> {
                             CheckingAccount ca = new CheckingAccount(owner, Currency.RON);
-                            owner.addAccount(ca);
+                            //owner.addAccount(ca);
                             accountService.addAccount(ca);
                             System.out.println("Checking account created.");
                         }
@@ -123,7 +123,7 @@ public class Main {
                                 break;
                             }
                             LoanAccount la = new LoanAccount(owner, Currency.RON, amount, 0.05, LocalDate.now().plusYears(1));
-                            owner.addAccount(la);
+                            //owner.addAccount(la);
                             accountService.addAccount(la);
                             System.out.println("Loan account created.");
                         }
@@ -131,7 +131,7 @@ public class Main {
                             System.out.println("⚠️ Invalid type. Defaulting to SavingsAccount.");
 
                             SavingsAccount sa = new SavingsAccount(owner, Currency.RON);
-                            owner.addAccount(sa);
+                            //owner.addAccount(sa);
                             accountService.addAccount(sa);
                             System.out.println("Savings account created.");
                         }
@@ -195,7 +195,7 @@ public class Main {
 
                     try{
                         Card card = new Card(owner, chosenAccount, type);
-                        owner.addCard(card);
+                        //owner.addCard(card);
                         cardService.addCard(card);
                         System.out.println("Card created.");
                     } catch (IllegalStateException e) {
