@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 public class Main {
     public static void main(String[] args) {
 
-        // Minim 10 tranzacții, 3 luni, CREDIT + DEBIT
+        // 10 tranzacții, 3 luni, CREDIT & DEBIT
         List<Tranzactie> lista = List.of(
                 new Tranzactie(1, 1500.00, "2026-01-15", "CREDIT", "RO01BANK"),
                 new Tranzactie(2, 750.50, "2026-01-22", "DEBIT", "RO02BANK"),
