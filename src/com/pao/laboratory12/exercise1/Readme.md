@@ -136,7 +136,7 @@ public final class DatabaseConnection {
             }
             props.load(is);
         }
-        String url  = props.getProperty("db.url");
+        String url = props.getProperty("db.url");
         String user = props.getProperty("db.user");
         String pass = props.getProperty("db.password");
 
