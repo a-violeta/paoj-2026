@@ -3,14 +3,17 @@ package com.pao.project.bank.model.account;
 import com.pao.project.bank.model.Currency;
 import com.pao.project.bank.model.User;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class LoanAccount extends Account {
 
-    private final double loanAmount;
+    private double loanAmount;
     private double remainingAmount;
     private double interestRate;
-    private final LocalDate dueDate;
+    private LocalDate dueDate;
+
+    public LoanAccount() {}
 
     // Complete constructor
     public LoanAccount(User owner, Currency currency, double loanAmount, double interestRate, LocalDate dueDate) {
@@ -90,4 +93,15 @@ public class LoanAccount extends Account {
                 "----------------------------------------";
     }
 
+    public void setRemainingAmount(double remainingAmount) {
+        this.remainingAmount = remainingAmount;
+    }
+
+    public void setLoanAmount(double loanAmount) {
+        this.loanAmount = loanAmount;
+    }
+
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
 }

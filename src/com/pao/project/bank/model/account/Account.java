@@ -7,6 +7,7 @@ import com.pao.project.bank.model.CurrencyConverter;
 import com.pao.project.bank.model.User;
 import com.pao.project.bank.model.transaction.Transaction;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +18,13 @@ public abstract class Account implements Comparable<Account> {
 
     protected String iban;
     private double balance;
-    private final User owner;
+    private User owner;
     protected Currency currency;
-    private final List<Transaction> transactionHistory;
+    private List<Transaction> transactionHistory;
     protected LocalDateTime createdAt;
     private boolean active = true;
+
+    public Account() {}
 
     public Account(User owner, Currency currency) {
 
@@ -147,6 +150,22 @@ public abstract class Account implements Comparable<Account> {
     @Override
     public int compareTo(Account other) {
         return this.iban.compareTo(other.iban);
+    }
+
+    public void setIban(String iban) {
+        this.iban = iban;
+    }
+
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 }
 

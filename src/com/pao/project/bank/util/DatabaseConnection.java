@@ -1,53 +1,46 @@
 package com.pao.project.bank.util;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
-public class DatabaseConnection {
+public final class DatabaseConnection {
 
-    private final Connection connection;
+    private Connection connection;
 
-    private DatabaseConnection() {
+    private DatabaseConnection() throws IOException, SQLException {
+        Properties properties = new Properties();
 
-        try {
-
-            Properties properties = new Properties();
-
-            InputStream input =
-                    getClass()
-                            .getClassLoader()
-                            .getResourceAsStream("db.properties");
+        try (InputStream input =
+                     getClass().getClassLoader().getResourceAsStream("resources/db.properties")) {
 
             if (input == null) {
-                throw new RuntimeException("db.properties not found");
+                throw new IOException("Cannot find db.properties");
             }
 
             properties.load(input);
-
-            String url = properties.getProperty("db.url");
-            String user = properties.getProperty("db.user");
-            String password = properties.getProperty("db.password");
-
-            connection =
-                    DriverManager.getConnection(url, user, password);
-
-            System.out.println("Database connected.");
-
-        } catch (Exception e) {
-
-            throw new RuntimeException(
-                    "Failed to initialize database connection",
-                    e
-            );
         }
+
+        String url = properties.getProperty("db.url");
+        String user = properties.getProperty("db.user");
+        String password = properties.getProperty("db.password");
+
+        connection = DriverManager.getConnection(url, user, password);
     }
 
     private static class Holder {
+        private static DatabaseConnection INSTANCE;
 
-        private static final DatabaseConnection INSTANCE =
-                new DatabaseConnection();
+        static {
+            try {
+                INSTANCE = new DatabaseConnection();
+            } catch (IOException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public static DatabaseConnection getInstance() {
@@ -56,5 +49,11 @@ public class DatabaseConnection {
 
     public Connection getConnection() {
         return connection;
+    }
+
+    public void closeConnection() throws SQLException {
+        if (connection != null && !connection.isClosed()) {
+            connection.close();
+        }
     }
 }

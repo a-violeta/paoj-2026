@@ -10,14 +10,40 @@ import com.pao.project.bank.service.AccountService;
 import com.pao.project.bank.service.UserService;
 import com.pao.project.bank.service.CardService;
 import com.pao.project.bank.service.TransactionService;
+import com.pao.project.bank.util.DatabaseConnection;
+
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 public class Main {
 
     public static void main(String[] args) {
+
+//        try {
+//            Connection connection =
+//                    DriverManager.getConnection(
+//                            "jdbc:postgresql://localhost:5433/bank_db",
+//                            "postgres",
+//                            "postgres"
+//                    );
+
+//            System.out.println("Connected!");
+
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            Connection connection =
+//                    DatabaseConnection.getInstance().getConnection();
+
+//            System.out.println("Connected!");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         Scanner scanner = new Scanner(System.in);
         Bank bank = Bank.getInstance();

@@ -7,6 +7,8 @@ public class SavingsAccount extends Account {
 
     private double interestRate;
 
+    public SavingsAccount() {}
+
     public SavingsAccount(User owner, Currency currency, double interestRate) {
         super(owner, currency);
 

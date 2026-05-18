@@ -7,6 +7,8 @@ public class CheckingAccount extends Account {
 
     private double overdraftLimit;
 
+    public CheckingAccount() {}
+
     // Constructor with custom limit
     public CheckingAccount(User owner, Currency currency, double overdraftLimit) {
         super(owner, currency);
