@@ -4,13 +4,23 @@ import com.pao.project.bank.model.CurrencyConverter;
 import com.pao.project.bank.model.account.Account;
 import com.pao.project.bank.model.account.CheckingAccount;
 import com.pao.project.bank.model.transaction.*;
+import com.pao.project.bank.repository.AccountRepository;
+import com.pao.project.bank.repository.TransactionRepository;
+import com.pao.project.bank.util.DatabaseConnection;
 
+import javax.xml.crypto.Data;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionService {
 
-    private final List<Transaction> transactions = new ArrayList<>();
+    // private final List<Transaction> transactions = new ArrayList<>();
+    private final TransactionRepository transactionRepository = new TransactionRepository();
+    private final AccountRepository accountRepository =
+            new AccountRepository();
 
     private TransactionService() {}
 
@@ -35,16 +45,45 @@ public class TransactionService {
             throw new IllegalArgumentException("Amount must be positive.");
         }
 
-        // update balance
-        account.deposit(amount);
+        Connection conn = null;
 
-        // create transaction
-        Deposit deposit = new Deposit(amount, account);
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
 
-        transactions.add(deposit);
+            // update balance
+            account.deposit(amount);
 
-        // add to history
-        account.addTransaction(deposit);
+            // update db
+            accountRepository.update(account, conn);
+
+            // create transaction
+            Deposit deposit = new Deposit(amount, account);
+
+            // save transaction in db
+            transactionRepository.save(deposit, conn);
+
+            // add to history
+            account.addTransaction(deposit);
+            conn.commit();
+        } catch (Exception e){
+            try{
+                if(conn != null){
+                    conn.rollback();
+                }
+            } catch(SQLException ex){
+                ex.printStackTrace();
+            }
+            throw new RuntimeException(e);
+        } finally{
+            try{
+                if(conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
     }
 
     public void withdraw(Account account, double amount) {
@@ -71,16 +110,47 @@ public class TransactionService {
             }
         }
 
-        // update balance
-        account.withdraw(amount);
+        Connection conn = null;
 
-        // create transaction
-        Withdrawal withdrawal = new Withdrawal(amount, account);
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
 
-        transactions.add(withdrawal);
+            // update balance
+            account.withdraw(amount);
 
-        // add to history
-        account.addTransaction(withdrawal);
+            // update db
+            accountRepository.update(account, conn);
+
+            // create transaction
+            Withdrawal withdrawal = new Withdrawal(amount, account);
+
+            // save in db
+            transactionRepository.save(withdrawal, conn);
+
+            // add to history
+            account.addTransaction(withdrawal);
+            conn.commit();
+        } catch(Exception e){
+
+            try{
+                if(conn!=null){
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+        } finally {
+            try{
+                if(conn!=null){
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void transfer(Account source, Account destination, double amount) {
@@ -109,18 +179,48 @@ public class TransactionService {
             }
         }
 
-        // update balances
-        source.withdraw(amount);
-        destination.deposit(amount);
+        Connection conn =null;
 
-        // create transaction
-        Transfer transfer = new Transfer(amount, source, destination);
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
 
-        transactions.add(transfer);
+            // update balances
+            source.withdraw(amount);
+            destination.deposit(amount);
 
-        // add to history
-        source.addTransaction(transfer);
-        destination.addTransaction(transfer);
+            // update db
+            accountRepository.update(source, conn);
+
+            accountRepository.update(destination, conn);
+
+            // create transaction
+            Transfer transfer = new Transfer(amount, source, destination);
+
+            transactionRepository.save(transfer, conn);
+
+            // add to history
+            source.addTransaction(transfer);
+            destination.addTransaction(transfer);
+            conn.commit();
+        } catch (Exception e){
+            try{
+                if(conn!=null){
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void internationalTransfer(Account from, Account to, double amount) {
@@ -155,58 +255,112 @@ public class TransactionService {
             }
         }
 
-        // update balances
-        from.withdraw(totalToWithdraw);
-        to.deposit(amount);
+        Connection conn = null;
 
-        // create transaction
-        InternationalTransfer internationalTransfer = new InternationalTransfer(amount, from, to);
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
 
-        transactions.add(internationalTransfer);
+            // update balances
+            from.withdraw(totalToWithdraw);
+            to.deposit(amount);
 
-        // add to history
-        from.addTransaction(internationalTransfer);
-        to.addTransaction(internationalTransfer);
+            // update db
+            accountRepository.update(from, conn);
+
+            accountRepository.update(to, conn);
+
+            // create transaction
+            InternationalTransfer internationalTransfer = new InternationalTransfer(amount, from, to);
+
+            transactionRepository.save(internationalTransfer, conn);
+
+            // add to history
+            from.addTransaction(internationalTransfer);
+            to.addTransaction(internationalTransfer);
+            conn.commit();
+        } catch (Exception e){
+            try{
+                if(conn!=null){
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public List<Transaction> getAllTransactions() {
-        return new ArrayList<>(transactions); // copy
+        try{
+            return transactionRepository.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean removeTransactionById(String id) {
-        Transaction t = null;
-
-        for (Transaction tr : transactions) {
-            if (tr.getId().equals(id)) {
-                t = tr;
-                break;
-            }
-        }
+        Transaction t = findTransactionById(id);
 
         if (t == null) return false;
+        //delete from db
 
-        //delete from account transactionHistory
-        Account from = t.getSourceAccount();
-        Account to = t.getDestinationAccount();
-        if (from != null) {
-            from.getTransactionHistory().remove(t);
+        Connection conn = null;
+
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            //delete from account transactionHistory
+            Account from = t.getSourceAccount();
+            Account to = t.getDestinationAccount();
+            if (from != null) {
+                from.getTransactionHistory().remove(t);
+            }
+            if (to != null) {
+                to.getTransactionHistory().remove(t);
+            }
+
+            transactionRepository.delete(id, conn);
+            conn.commit();
+            return true;
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        if (to != null) {
-            to.getTransactionHistory().remove(t);
-        }
-
-        //delete from transactionService list
-        transactions.remove(t);
-
-        return true;
     }
 
     public Transaction findTransactionById(String id) {
-        for (Transaction t : transactions) {
-            if (t.getId().equals(id)) {
-                return t;
-            }
+        try {
+            return transactionRepository.findById(id).orElse(null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        return null;
     }
 }

@@ -14,6 +14,24 @@ public class Card {
     private boolean active;
     private CardType type;
 
+    public Card(
+            ImmutableIdentifier cardNumber,
+            String cvv,
+            LocalDate expirationDate,
+            User owner,
+            Account account,
+            boolean active,
+            CardType type
+    ) {
+        this.cardNumber = cardNumber;
+        this.cvv = cvv;
+        this.expirationDate = expirationDate;
+        this.owner = owner;
+        this.account = account;
+        this.active = active;
+        this.type = type;
+    }
+
     public Card(User owner, Account account, CardType type) {
         if (account == null || owner == null || type == null) {
             throw new IllegalArgumentException("Account, owner and type cannot be null.");

@@ -2,17 +2,20 @@ package com.pao.project.bank.service;
 
 import com.pao.project.bank.model.User;
 import com.pao.project.bank.model.account.Account;
+import com.pao.project.bank.repository.UserRepository;
+import com.pao.project.bank.util.DatabaseConnection;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class UserService {
 
-    private List<User> users;
+    //private List<User> users;
+    private final UserRepository userRepository = new UserRepository();
 
-    private UserService() {
-        this.users = new ArrayList<>();
-    }
+    private UserService() {}
 
     private static class Holder {
         private static final UserService INSTANCE = new UserService();
@@ -24,36 +27,100 @@ public class UserService {
 
     public void addUser(User user) {
         if(user == null) return;
-        users.add(user);
+
+        Connection conn = null;
+
+        try{
+            conn= DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            userRepository.save(user, conn);
+
+            conn.commit();
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void deleteUser(User user) {
         if (user == null) return;
 
-        // delete accounts => and cards and transactions
-        for (Account acc : new ArrayList<>(user.getAccounts())) {
-            AccountService.getInstance().deleteAccount(acc);
+        Connection conn = null;
+
+        try {
+            conn=DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            // delete accounts => and cards and transactions
+            for (Account acc : new ArrayList<>(user.getAccounts())) {
+                AccountService.getInstance().deleteAccount(acc);
+            }
+
+            // delete user
+            userRepository.delete(user.getId(), conn);
+
+            conn.commit();
+
+            System.out.println("✔ User " + user.getName() + " and all associated data have been deleted.");
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-
-        // delete user
-        users.remove(user);
-
-        System.out.println("✔ User " + user.getName() + " and all associated data have been deleted.");
     }
 
     public User findUserById(String id){
         if (id == null || id.isBlank()) return null;
 
-        for (User u: users){
-            if (u.getId().equals(id)) {
-                return u;
-            }
+        try{
+            return userRepository.findById(id).orElse(null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public List<User> getAllUsers() {
-        return new ArrayList<>(users);
+        try{
+            return userRepository.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -15,6 +15,19 @@ public class User {
     private List<Account> accounts;
     private List<Card> cards;
 
+    public User(String id, String name, String email, String phone) {
+        if (name == null || name.isBlank()) throw new IllegalArgumentException();
+        if (email == null || email.isBlank()) throw new IllegalArgumentException();
+        if (phone == null || phone.isBlank()) throw new IllegalArgumentException();
+
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.accounts = new ArrayList<>();
+        this.cards = new ArrayList<>();
+    }
+
     public User(String name, String email, String phone) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Name cannot be empty");

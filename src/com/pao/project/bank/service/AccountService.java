@@ -7,7 +7,12 @@ import com.pao.project.bank.model.account.Account;
 import com.pao.project.bank.model.account.SavingsAccount;
 import com.pao.project.bank.model.account.LoanAccount;
 import com.pao.project.bank.model.transaction.Transaction;
+import com.pao.project.bank.repository.AccountRepository;
+import com.pao.project.bank.util.DatabaseConnection;
 
+import javax.xml.crypto.Data;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,13 +20,12 @@ import java.util.Map;
 
 public class AccountService {
 
-    private List<Account> accounts;
+    //private List<Account> accounts;
+    private final AccountRepository accountRepository = new AccountRepository();
     private final Map<String, Account> accountsByIban = new HashMap<>();
     // reference the same objects, but the collections need to be updated separately
 
-    private AccountService() {
-        this.accounts = new ArrayList<>();
-    }
+    private AccountService() {}
 
     private static class Holder {
         private static final AccountService INSTANCE = new AccountService();
@@ -34,42 +38,109 @@ public class AccountService {
     public void addAccount(Account account) {
         if(account == null) return;
 
-        accounts.add(account);
-        accountsByIban.put(account.getIban(), account);
-        account.getOwner().getAccounts().add(account);
+        Connection conn = null;
+
+        try {
+            conn= DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            accountsByIban.put(account.getIban(), account);
+            account.getOwner().getAccounts().add(account);
+            accountRepository.save(account, conn);
+            conn.commit();
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void deleteAccount(Account account) {
         if (account == null) return;
 
-        // delete cards
-        for (Card card : new ArrayList<>(CardService.getInstance().getAllCards())) {
-            if (card.getAccount().equals(account)) {
-                CardService.getInstance().deleteCard(card);
+        Connection conn = null;
+
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            // delete cards
+            for (Card card :List.copyOf(CardService.getInstance().getAllCards())) {
+                if (card.getAccount().equals(account)) {
+                    CardService.getInstance().deleteCard(card);
+                }
+            }
+
+            // delete transactions
+            for (Transaction t : List.copyOf(account.getTransactionHistory())) {
+                TransactionService.getInstance().removeTransactionById(t.getId());
+            }
+
+            accountRepository.delete(account.getIban(), conn);
+
+            // delete account from owner
+            account.getOwner().getAccounts().remove(account);
+
+            accountsByIban.remove(account.getIban());
+
+            conn.commit();
+
+            System.out.println("✔ Account " + account.getIban() + " and all associated data have been deleted.");
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
-
-        // delete transactions
-        for (Transaction t : new ArrayList<>(account.getTransactionHistory())) {
-            TransactionService.getInstance().removeTransactionById(t.getId());
-        }
-
-        // delete account from owner
-        account.getOwner().getAccounts().remove(account);
-
-        // and from accountService list
-        accounts.remove(account);
-        accountsByIban.remove(account.getIban());
-
-        System.out.println("✔ Account " + account.getIban() + " and all associated data have been deleted.");
     }
 
     public Account findAccountByIban(String iban) {
-        return accountsByIban.get(iban);
+        try{
+            return accountRepository.findByIban(iban).orElse(null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<Account> getAllAccounts() {
-        return new ArrayList<>(accounts); // copy
+        try{
+            return accountRepository.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // takes care of the cards too
@@ -82,12 +153,43 @@ public class AccountService {
             throw new InactiveAccountException("Account " + account.getIban() + " is already inactive.");
         }
 
-        // deactivate account
-        account.setActive(false);
-        System.out.println("✔ Account " + account.getIban() + " has been deactivated.");
+        Connection conn = null;
 
-        // and the cards too
-        CardService.getInstance().deactivateCardsForAccount(account);
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            // deactivate account
+            account.setActive(false);
+
+            accountRepository.update(account, conn);
+            System.out.println("✔ Account " + account.getIban() + " has been deactivated.");
+
+            // and the cards too
+            CardService.getInstance().deactivateCardsForAccount(account);
+            conn.commit();
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void changeInterestRate(SavingsAccount account, double newRate) {
@@ -95,7 +197,37 @@ public class AccountService {
         if(newRate <= 0 || newRate >= 0.3)
             throw new IllegalArgumentException("⚠️ New interest rate not accepted.");
 
-        account.setInterestRate(newRate);
+        Connection conn = null;
+
+        try {
+            conn= DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            account.setInterestRate(newRate);
+            accountRepository.update(account, conn);
+            conn.commit();
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void changeLoanInterest(LoanAccount account, double newRate) {
@@ -103,6 +235,36 @@ public class AccountService {
         if(newRate <= 0 || newRate >= 0.3)
             throw new IllegalArgumentException("⚠️ New interest rate not accepted.");
 
-        account.setInterestRate(newRate);
+        Connection conn = null;
+
+        try{
+            conn =DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            account.setInterestRate(newRate);
+            accountRepository.update(account, conn);
+            conn.commit();
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

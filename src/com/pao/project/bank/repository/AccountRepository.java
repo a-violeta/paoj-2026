@@ -13,13 +13,9 @@ import java.util.Optional;
 
 public class AccountRepository {
 
-    private Connection getConn() throws SQLException, IOException {
-        return DatabaseConnection.getInstance().getConnection();
-    }
-
-    // =========================================================
-    // MAPPING (FOARTE IMPORTANT LA TINE)
-    // =========================================================
+    // =============
+    // MAPPING
+    // =============
     private Account mapRow(ResultSet rs) throws SQLException {
         String type = rs.getString("type");
 
@@ -52,17 +48,17 @@ public class AccountRepository {
         account.setCurrency(Currency.valueOf(rs.getString("currency")));
         account.setActive(rs.getBoolean("active"));
 
-        // user minimal (doar ID + eventual name)
+        // user minimal (ID + eventual name)
         User owner = new UserPlaceholder(rs.getString("user_id"));
         account.setOwner(owner);
 
         return account;
     }
 
-    // =========================================================
+    // ===============
     // SAVE
-    // =========================================================
-    public void save(Account account) throws SQLException {
+    // ===============
+    public void save(Account account, Connection conn) throws SQLException {
         String sql = """
             INSERT INTO accounts
             (iban, balance, currency, type,
@@ -72,7 +68,7 @@ public class AccountRepository {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
         """;
 
-        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, account.getIban());
             ps.setDouble(2, account.getBalance());
@@ -108,88 +104,84 @@ public class AccountRepository {
             ps.setString(11, account.getOwner().getId());
 
             ps.executeUpdate();
-        } catch (IOException e) {
-            throw new SQLException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    // =========================================================
+    // ================
     // FIND BY IBAN
-    // =========================================================
-    public Optional<Account> findByIban(String iban) throws SQLException {
+    // ================
+    public Optional<Account> findByIban(String iban, Connection conn) throws SQLException {
         String sql = "SELECT * FROM accounts WHERE iban = ?";
 
-        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, iban);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return Optional.of(mapRow(rs));
                 return Optional.empty();
             }
-        } catch (IOException e) {
-            throw new SQLException(e);
         }
     }
 
-    // =========================================================
-    // FIND ALL
-    // =========================================================
-    public List<Account> findAll() throws SQLException {
+    // ===============
+    // LIST ALL
+    // ===============
+    public List<Account> findAll(Connection conn) throws SQLException {
         String sql = "SELECT * FROM accounts";
 
         List<Account> list = new ArrayList<>();
 
-        try (PreparedStatement ps = getConn().prepareStatement(sql);
+        try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 list.add(mapRow(rs));
             }
 
-        } catch (IOException e) {
-            throw new SQLException(e);
         }
 
         return list;
     }
 
-    // =========================================================
+    // ===============
     // UPDATE
-    // =========================================================
-    public void update(Account account) throws SQLException {
+    // ===============
+    public void update(Account account, Connection conn) throws SQLException {
         String sql = """
             UPDATE accounts
             SET balance = ?, active = ?
             WHERE iban = ?
         """;
 
-        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDouble(1, account.getBalance());
             ps.setBoolean(2, account.isActive());
             ps.setString(3, account.getIban());
             ps.executeUpdate();
-        } catch (IOException e) {
-            throw new SQLException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    // =========================================================
+    // ===============
     // DELETE
-    // =========================================================
-    public void delete(String iban) throws SQLException {
+    // ===============
+    public void delete(String iban, Connection conn) throws SQLException {
         String sql = "DELETE FROM accounts WHERE iban = ?";
 
-        try (PreparedStatement ps = getConn().prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, iban);
             ps.executeUpdate();
-        } catch (IOException e) {
-            throw new SQLException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    // =========================================================
-    // helper minimal user (fără să încarci tot graful)
-    // =========================================================
+    // ================
+    // helper minimal user
+    // ================
     private static class UserPlaceholder extends User {
         public UserPlaceholder(String id) {
             super("temp", "temp@mail.com", "000");
