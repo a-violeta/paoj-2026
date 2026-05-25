@@ -12,20 +12,23 @@ public class User {
     private String name;
     private String email;
     private String phone;
-    private List<Account> accounts;
-    private List<Card> cards;
+    // lists become useless after db integration, but i keep them; just don t use them
+    //private List<Account> accounts;
+    //private List<Card> cards;
 
     public User(String id, String name, String email, String phone) {
         if (name == null || name.isBlank()) throw new IllegalArgumentException();
         if (email == null || email.isBlank()) throw new IllegalArgumentException();
         if (phone == null || phone.isBlank()) throw new IllegalArgumentException();
 
+        // can it be acceptable to make a user without these checks taking into account DB integration?
+
         this.id = id;
         this.name = name;
         this.email = email;
         this.phone = phone;
-        this.accounts = new ArrayList<>();
-        this.cards = new ArrayList<>();
+        //this.accounts = new ArrayList<>();
+        //this.cards = new ArrayList<>();
     }
 
     public User(String name, String email, String phone) {
@@ -43,18 +46,8 @@ public class User {
         this.name = name;
         this.email = email;
         this.phone = phone;
-        this.accounts = new ArrayList<>();
-        this.cards = new ArrayList<>();
-    }
-
-    public void addAccount(Account account) {
-        if( account == null) return;
-        accounts.add(account);
-    }
-
-    public void addCard(Card card) {
-        if(card == null) return;
-        cards.add(card);
+        //this.accounts = new ArrayList<>();
+        //this.cards = new ArrayList<>();
     }
 
     //-------------------
@@ -77,21 +70,13 @@ public class User {
         return phone;
     }
 
-    public List<Account> getAccounts() {
-        return accounts;
-    }
-
-    public List<Card> getCards() {
-        return cards;
-    }
-
     @Override
     public String toString() {
         return  "----------------------------------------\n" +
                 "👤 User\n" +
                 "• Name:        " + name + "\n" +
-                "• Accounts:    " + accounts.size() + "\n" +
-                "• Cards:       " + cards.size() + "\n" +
+                "• Email:       " + email + "\n" +
+                "• Phone:       " + phone + "\n" +
                 "----------------------------------------";
     }
 

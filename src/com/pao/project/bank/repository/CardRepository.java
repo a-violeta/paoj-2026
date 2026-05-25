@@ -13,24 +13,14 @@ public class CardRepository {
     // MAPPING
     private Card mapRow(ResultSet rs) throws SQLException {
 
-        String number = rs.getString("card_number");
-        String cvv = rs.getString("cvv");
-        LocalDate exp = rs.getDate("expiration_date").toLocalDate();
-        boolean active = rs.getBoolean("active");
-
-        CardType type = CardType.valueOf(rs.getString("type"));
-
-        User owner = new UserPlaceholder(rs.getString("user_id"));
-        Account account = new AccountPlaceholder(rs.getString("iban"));
-
         return new Card(
-                new ImmutableIdentifier(number),
-                cvv,
-                exp,
-                owner,
-                account,
-                active,
-                type
+                rs.getString("card_number"),
+                rs.getString("cvv"),
+                rs.getDate("expiration_date").toLocalDate(),
+                rs.getString("user_id"),
+                rs.getString("iban"),
+                rs.getBoolean("active"),
+                CardType.valueOf(rs.getString("type"))
         );
     }
 
@@ -49,8 +39,8 @@ public class CardRepository {
             ps.setDate(3, Date.valueOf(card.getExpirationDate()));
             ps.setBoolean(4, card.isActive());
             ps.setString(5, card.getType().name());
-            ps.setString(6, card.getOwner().getId());
-            ps.setString(7, card.getAccount().getIban());
+            ps.setString(6, card.getUserId());
+            ps.setString(7, card.getAccountIban());
 
             ps.executeUpdate();
 

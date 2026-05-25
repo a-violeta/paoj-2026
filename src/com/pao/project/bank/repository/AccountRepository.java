@@ -44,9 +44,7 @@ public class AccountRepository {
         account.setCurrency(Currency.valueOf(rs.getString("currency")));
         account.setActive(rs.getBoolean("active"));
 
-        // minimal user (ID + maybe name)
-        User owner = new UserPlaceholder(rs.getString("user_id"));
-        account.setOwner(owner);
+        account.setUserId(rs.getString("user_id"));
 
         return account;
     }
@@ -95,7 +93,7 @@ public class AccountRepository {
             }
 
             ps.setBoolean(10, account.isActive());
-            ps.setString(11, account.getOwner().getId());
+            ps.setString(11, account.getUserId());
 
             ps.executeUpdate();
         } catch (Exception e) {
@@ -164,15 +162,23 @@ public class AccountRepository {
         }
     }
 
-    // minimal user helper
-    private static class UserPlaceholder extends User {
-        public UserPlaceholder(String id) {
-            super("temp", "temp@mail.com", "000");
-            try {
-                java.lang.reflect.Field f = User.class.getDeclaredField("id");
-                f.setAccessible(true);
-                f.set(this, id);
-            } catch (Exception ignored) {}
+    public List<Account> findByUserId(String userId, Connection conn) throws SQLException {
+
+        String sql = "SELECT * FROM accounts WHERE user_id = ?";
+
+        List<Account> list = new ArrayList<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            }
         }
+        return list;
     }
 }

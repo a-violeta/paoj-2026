@@ -2,6 +2,7 @@ package com.pao.project.bank.service;
 
 import com.pao.project.bank.model.User;
 import com.pao.project.bank.model.account.Account;
+import com.pao.project.bank.repository.AccountRepository;
 import com.pao.project.bank.repository.UserRepository;
 import com.pao.project.bank.util.DatabaseConnection;
 
@@ -14,6 +15,7 @@ public class UserService {
 
     //private List<User> users;
     private final UserRepository userRepository = new UserRepository();
+    private final AccountRepository accountRepository = new AccountRepository();
 
     private UserService() {}
 
@@ -37,6 +39,7 @@ public class UserService {
             userRepository.save(user, conn);
 
             conn.commit();
+            AuditService.getInstance().logAction("add_user");
         } catch (Exception e) {
 
             try {
@@ -71,14 +74,17 @@ public class UserService {
             conn.setAutoCommit(false);
 
             // delete accounts => and cards and transactions
-            for (Account acc : new ArrayList<>(user.getAccounts())) {
-                AccountService.getInstance().deleteAccount(acc);
+            for (Account acc : List.copyOf(AccountService.getInstance().getAllAccounts())) {
+                if(acc.getUserId().equals(user.getId())) {
+                    AccountService.getInstance().deleteAccount(acc);
+                }
             }
 
             // delete user
             userRepository.delete(user.getId(), conn);
 
             conn.commit();
+            AuditService.getInstance().logAction("delete_user");
 
             System.out.println("✔ User " + user.getName() + " and all associated data have been deleted.");
         } catch (Exception e) {
@@ -130,5 +136,4 @@ public class UserService {
             throw new RuntimeException(e);
         }
     }
-
 }

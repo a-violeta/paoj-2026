@@ -59,14 +59,15 @@ public class TransactionService {
             accountRepository.update(account, conn);
 
             // create transaction
-            Deposit deposit = new Deposit(amount, account);
+            Deposit deposit = new Deposit(amount, account.getIban());
 
             // save transaction in db
             transactionRepository.save(deposit, conn);
 
             // add to history
-            account.addTransaction(deposit);
+            //account.addTransaction(deposit);
             conn.commit();
+            AuditService.getInstance().logAction("add_deposit");
         } catch (Exception e){
             try{
                 if(conn != null){
@@ -124,14 +125,15 @@ public class TransactionService {
             accountRepository.update(account, conn);
 
             // create transaction
-            Withdrawal withdrawal = new Withdrawal(amount, account);
+            Withdrawal withdrawal = new Withdrawal(amount, account.getIban());
 
             // save in db
             transactionRepository.save(withdrawal, conn);
 
             // add to history
-            account.addTransaction(withdrawal);
+            //account.addTransaction(withdrawal);
             conn.commit();
+            AuditService.getInstance().logAction("add_withdrawal");
         } catch(Exception e){
 
             try{
@@ -196,14 +198,15 @@ public class TransactionService {
             accountRepository.update(destination, conn);
 
             // create transaction
-            Transfer transfer = new Transfer(amount, source, destination);
+            Transfer transfer = new Transfer(amount, source.getIban(), destination.getIban());
 
             transactionRepository.save(transfer, conn);
 
             // add to history
-            source.addTransaction(transfer);
-            destination.addTransaction(transfer);
+            //source.addTransaction(transfer);
+            //destination.addTransaction(transfer);
             conn.commit();
+            AuditService.getInstance().logAction("add_transfer");
         } catch (Exception e){
             try{
                 if(conn!=null){
@@ -240,6 +243,9 @@ public class TransactionService {
         if (from == to) {
             throw new IllegalArgumentException("Cannot transfer to the same account.");
         }
+        if(from.getCurrency() == to.getCurrency()){
+            throw new IllegalArgumentException("Accounts must have different currencies.");
+        }
 
         // check money
         double amountInSourceCurrency =CurrencyConverter.convert(amount, to.getCurrency(), from.getCurrency());
@@ -272,14 +278,16 @@ public class TransactionService {
             accountRepository.update(to, conn);
 
             // create transaction
-            InternationalTransfer internationalTransfer = new InternationalTransfer(amount, from, to);
+            InternationalTransfer internationalTransfer = new InternationalTransfer(amount, from.getIban(), to.getIban());
 
             transactionRepository.save(internationalTransfer, conn);
 
             // add to history
-            from.addTransaction(internationalTransfer);
-            to.addTransaction(internationalTransfer);
+            //from.addTransaction(internationalTransfer);
+            //to.addTransaction(internationalTransfer);
+
             conn.commit();
+            AuditService.getInstance().logAction("add_international-transfer");
         } catch (Exception e){
             try{
                 if(conn!=null){
@@ -312,6 +320,26 @@ public class TransactionService {
         }
     }
 
+    // better if filtrating in TransactionRepository
+    public List<Transaction> getAccountTransactions(String accountIban) {
+        Connection conn = null;
+
+        try{
+            conn=DatabaseConnection.getInstance().getConnection();
+            List<Transaction> list = new ArrayList<>();
+
+            for(Transaction t: transactionRepository.findAll(conn)){
+                if((t.getSourceIban() != null && t.getSourceIban().equals(accountIban)) ||
+                        (t.getDestinationIban() != null && t.getDestinationIban().equals(accountIban))){
+                    list.add(t);
+                }
+            }
+            return list;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public boolean removeTransactionById(String id) {
         Transaction t = findTransactionById(id);
 
@@ -324,18 +352,9 @@ public class TransactionService {
             conn = DatabaseConnection.getInstance().getConnection();
             conn.setAutoCommit(false);
 
-            //delete from account transactionHistory
-            Account from = t.getSourceAccount();
-            Account to = t.getDestinationAccount();
-            if (from != null) {
-                from.getTransactionHistory().remove(t);
-            }
-            if (to != null) {
-                to.getTransactionHistory().remove(t);
-            }
-
             transactionRepository.delete(id, conn);
             conn.commit();
+            AuditService.getInstance().logAction("delete_transaction");
             return true;
         } catch (Exception e) {
 

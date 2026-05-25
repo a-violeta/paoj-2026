@@ -10,8 +10,8 @@ public class CheckingAccount extends Account {
     public CheckingAccount() {}
 
     // Constructor with custom limit
-    public CheckingAccount(User owner, Currency currency, double overdraftLimit) {
-        super(owner, currency);
+    public CheckingAccount(String ownerId, Currency currency, double overdraftLimit) {
+        super(ownerId, currency);
 
         if (overdraftLimit <= 100.0 || overdraftLimit >= 10000.0){
             this.overdraftLimit = 1000.0;
@@ -22,8 +22,8 @@ public class CheckingAccount extends Account {
     }
 
     // Constructor with default limit 1000
-    public CheckingAccount(User owner, Currency currency) {
-        super(owner, currency);
+    public CheckingAccount(String ownerId, Currency currency) {
+        super(ownerId, currency);
         this.overdraftLimit = 1000.0;
     }
 
@@ -40,7 +40,7 @@ public class CheckingAccount extends Account {
         return  "----------------------------------------\n" +
                 "💳 CheckingAccount\n" +
                 "• IBAN:        " + getIban() + "\n" +
-                "• Owner:       " + getOwner().getName() + "\n" +
+                "• Owner ID:       " + getUserId() + "\n" +
                 "• Balance:     💰 " + String.format("%.2f", getBalance()) + " " + getCurrency() + "\n" +
                 "• Overdraft:   " + overdraftLimit + "\n" +
                 "• Active:      " + (isActive() ? "🔓 YES" : "🔒 NO") + "\n" +

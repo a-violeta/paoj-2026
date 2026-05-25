@@ -4,10 +4,10 @@ import com.pao.project.bank.model.account.Account;
 
 public class Deposit extends Transaction {
 
-    public Deposit(double amount, Account account) {
+    public Deposit(double amount, String accountIban) {
         super(
                 amount,
-                account,        // sourceAccount
+                accountIban,        // sourceAccount
                 null,           // destinationAccount
                 TransactionType.DEPOSIT
         );

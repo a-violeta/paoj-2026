@@ -26,25 +26,25 @@ public class TransactionRepository {
                 ps.setString(3, "DEPOSIT");
                 ps.setNull(4, Types.NUMERIC);
                 ps.setNull(5, Types.VARCHAR);
-                ps.setString(6, tx.getDestinationAccount().getIban());
+                ps.setString(6, tx.getDestinationIban());
 
             } else if (tx instanceof Withdrawal) {
                 ps.setString(3, "WITHDRAWAL");
                 ps.setNull(4, Types.NUMERIC);
-                ps.setString(5, tx.getSourceAccount().getIban());
+                ps.setString(5, tx.getSourceIban());
                 ps.setNull(6, Types.VARCHAR);
 
             } else if (tx instanceof Transfer) {
                 ps.setString(3, "TRANSFER");
                 ps.setNull(4, Types.NUMERIC);
-                ps.setString(5, tx.getSourceAccount().getIban());
-                ps.setString(6, tx.getDestinationAccount().getIban());
+                ps.setString(5, tx.getSourceIban());
+                ps.setString(6, tx.getDestinationIban());
 
             } else if (tx instanceof InternationalTransfer it) {
                 ps.setString(3, "INTERNATIONAL_TRANSFER");
                 ps.setDouble(4, it.getFee());
-                ps.setString(5, tx.getSourceAccount().getIban());
-                ps.setString(6, tx.getDestinationAccount().getIban());
+                ps.setString(5, tx.getSourceIban());
+                ps.setString(6, tx.getDestinationIban());
             }
 
             ps.executeUpdate();
@@ -104,23 +104,20 @@ public class TransactionRepository {
         String sourceIban = rs.getString("source_iban");
         String destIban = rs.getString("destination_iban");
 
-        AccountRef source = new AccountRef(sourceIban);
-        AccountRef dest = new AccountRef(destIban);
-
         return switch (type) {
 
             case "DEPOSIT" ->
-                    new Deposit(amount, dest.toAccount());
+                    new Deposit(amount, sourceIban);
 
             case "WITHDRAWAL" ->
-                    new Withdrawal(amount, source.toAccount());
+                    new Withdrawal(amount, sourceIban);
 
             case "TRANSFER" ->
-                    new Transfer(amount, source.toAccount(), dest.toAccount());
+                    new Transfer(amount, sourceIban, destIban);
 
             case "INTERNATIONAL_TRANSFER" -> {
                 double fee = rs.getDouble("fee");
-                yield new InternationalTransfer(amount, source.toAccount(), dest.toAccount());
+                    yield new InternationalTransfer(amount, sourceIban, destIban);
             }
 
             default -> throw new IllegalStateException("Unknown type");

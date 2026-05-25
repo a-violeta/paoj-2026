@@ -16,8 +16,8 @@ public class LoanAccount extends Account {
     public LoanAccount() {}
 
     // Complete constructor
-    public LoanAccount(User owner, Currency currency, double loanAmount, double interestRate, LocalDate dueDate) {
-        super(owner, currency);
+    public LoanAccount(String ownerId, Currency currency, double loanAmount, double interestRate, LocalDate dueDate) {
+        super(ownerId, currency);
 
         if (interestRate <= 0 || interestRate >= 0.2){
             this.interestRate = 0.05;
@@ -43,8 +43,8 @@ public class LoanAccount extends Account {
     }
 
     // Constructor with default values: interest rate 5%, due date after 1 year
-    public LoanAccount(User owner, Currency currency, double loanAmount) {
-        super(owner, currency);
+    public LoanAccount(String ownerId, Currency currency, double loanAmount) {
+        super(ownerId, currency);
         this.loanAmount = loanAmount;
         this.remainingAmount = loanAmount;
         this.interestRate = 0.05;
@@ -85,7 +85,7 @@ public class LoanAccount extends Account {
         return  "----------------------------------------\n" +
                 "💳 LoanAccount\n" +
                 "• IBAN:        " + getIban() + "\n" +
-                "• Owner:       " + getOwner().getName() + "\n" +
+                "• Owner ID:       " + getUserId() + "\n" +
                 "• LoanAmount:  " + loanAmount  + " " + getCurrency() + "\n"+
                 "• Interest:    " + interestRate + "\n" +
                 "• DueDate:     " + dueDate + "\n" +

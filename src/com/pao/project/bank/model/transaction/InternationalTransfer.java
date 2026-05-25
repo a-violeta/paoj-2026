@@ -6,16 +6,16 @@ public class InternationalTransfer extends Transfer {
 
     private double fee;
 
-    public InternationalTransfer(double amount, Account from, Account to) {
-        super(amount, from, to);
+    public InternationalTransfer(double amount, String fromIban, String toIban) {
+        super(amount, fromIban, toIban);
         this.fee = amount * 0.02; // 2%
     }
 
     @Override
     public String toString() {
         return super.toString() +
-                " (International, currency=" + this.getDestinationAccount().getCurrency() +
-                ", fee=" + fee + ")";
+                " (International, " +
+                "fee=" + fee + ")";
     }
 
     public double getFee() {

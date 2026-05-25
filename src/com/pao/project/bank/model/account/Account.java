@@ -6,6 +6,7 @@ import com.pao.project.bank.model.Currency;
 import com.pao.project.bank.model.CurrencyConverter;
 import com.pao.project.bank.model.User;
 import com.pao.project.bank.model.transaction.Transaction;
+import com.pao.project.bank.service.UserService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,26 +19,28 @@ public abstract class Account implements Comparable<Account> {
 
     protected String iban;
     private double balance;
-    private User owner;
+    //private User owner;
+    private String userId;
     protected Currency currency;
-    private List<Transaction> transactionHistory;
+    //private List<Transaction> transactionHistory;
     protected LocalDateTime createdAt;
     private boolean active = true;
 
     public Account() {}
 
-    public Account(User owner, Currency currency) {
+    public Account(String ownerId, Currency currency) {
 
-        if (owner == null || currency == null){
+        if (ownerId == null || ownerId.isBlank() || currency == null){
             throw new IllegalArgumentException("Account cannot have a null owner or currency.");
         }
 
         this.iban = generateIBAN();
         this.balance = 0.0;
-        this.owner = owner;
+        //this.owner = owner;
         this.currency = currency;
-        this.transactionHistory = new ArrayList<>();
+        //this.transactionHistory = new ArrayList<>();
         this.createdAt = LocalDateTime.now();
+        this.userId = ownerId;
     }
 
     private String generateIBAN() {
@@ -49,12 +52,6 @@ public abstract class Account implements Comparable<Account> {
         }
 
         return sb.toString();
-    }
-
-    public void addTransaction(Transaction t) {
-        if(t == null) return;
-
-        transactionHistory.add(t);
     }
 
     // useful for transaction service
@@ -95,16 +92,8 @@ public abstract class Account implements Comparable<Account> {
         return balance;
     }
 
-    public User getOwner() {
-        return owner;
-    }
-
     public Currency getCurrency() {
         return currency;
-    }
-
-    public List<Transaction> getTransactionHistory() {
-        return transactionHistory;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -115,8 +104,16 @@ public abstract class Account implements Comparable<Account> {
         return this.active;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
     public void setActive(boolean newActive){
         this.active = newActive;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public boolean isActive(){
@@ -128,7 +125,7 @@ public abstract class Account implements Comparable<Account> {
         return  "----------------------------------------\n" +
                 "💳 " + getClass().getSimpleName() + "\n" +
                 "• IBAN:        " + iban + "\n" +
-                "• Owner:       " + owner.getName() + "\n" +
+                "• Owner ID:       " + userId + "\n" +
                 "• Balance:     💰 " + String.format("%.2f", balance) + " " + currency + "\n" +
                 "• Active:      " + (active ? "🔓 YES" : "🔒 NO") + "\n" +
                 "----------------------------------------";
@@ -164,8 +161,5 @@ public abstract class Account implements Comparable<Account> {
         this.balance = balance;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
-    }
 }
 

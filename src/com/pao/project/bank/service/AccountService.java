@@ -45,9 +45,10 @@ public class AccountService {
             conn.setAutoCommit(false);
 
             accountsByIban.put(account.getIban(), account);
-            account.getOwner().getAccounts().add(account);
+            //account.getOwner().getAccounts().add(account);
             accountRepository.save(account, conn);
             conn.commit();
+            AuditService.getInstance().logAction("add_account");
         } catch (Exception e) {
 
             try {
@@ -83,24 +84,27 @@ public class AccountService {
 
             // delete cards
             for (Card card :List.copyOf(CardService.getInstance().getAllCards())) {
-                if (card.getAccount().equals(account)) {
+                if (card.getAccountIban().equals(account.getIban())) {
                     CardService.getInstance().deleteCard(card);
                 }
             }
 
             // delete transactions
-            for (Transaction t : List.copyOf(account.getTransactionHistory())) {
-                TransactionService.getInstance().removeTransactionById(t.getId());
+            for (Transaction t :List.copyOf(TransactionService.getInstance().getAllTransactions())) {
+                if (t.getSourceIban().equals(account.getIban()) || t.getDestinationIban().equals(account.getIban())) {
+                    TransactionService.getInstance().removeTransactionById(t.getId());
+                }
             }
 
             accountRepository.delete(account.getIban(), conn);
 
             // delete account from owner
-            account.getOwner().getAccounts().remove(account);
+            //account.getOwner().getAccounts().remove(account);
 
             accountsByIban.remove(account.getIban());
 
             conn.commit();
+            AuditService.getInstance().logAction("delete_account");
 
             System.out.println("✔ Account " + account.getIban() + " and all associated data have been deleted.");
         } catch (Exception e) {
@@ -144,9 +148,20 @@ public class AccountService {
         Connection conn= null;
         try{
             conn=DatabaseConnection.getInstance().getConnection();
-            //conn.setAutoCommit(false);
 
             return accountRepository.findAll(conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Account> getOwnerAccounts(String ownerId) {
+
+        try {
+            Connection conn = DatabaseConnection.getInstance().getConnection();
+
+            return accountRepository.findByUserId(ownerId, conn);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -177,6 +192,7 @@ public class AccountService {
             // and the cards too
             CardService.getInstance().deactivateCardsForAccount(account);
             conn.commit();
+            AuditService.getInstance().logAction("deactivate_account");
         } catch (Exception e) {
 
             try {
@@ -215,6 +231,7 @@ public class AccountService {
             account.setInterestRate(newRate);
             accountRepository.update(account, conn);
             conn.commit();
+            AuditService.getInstance().logAction("update_account");
         } catch (Exception e) {
 
             try {
@@ -253,6 +270,7 @@ public class AccountService {
             account.setInterestRate(newRate);
             accountRepository.update(account, conn);
             conn.commit();
+            AuditService.getInstance().logAction("update_account");
         } catch (Exception e) {
 
             try {

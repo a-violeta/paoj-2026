@@ -9,8 +9,8 @@ public class SavingsAccount extends Account {
 
     public SavingsAccount() {}
 
-    public SavingsAccount(User owner, Currency currency, double interestRate) {
-        super(owner, currency);
+    public SavingsAccount(String ownerId, Currency currency, double interestRate) {
+        super(ownerId, currency);
 
         if (interestRate <= 0 || interestRate >= 0.2){
             this.interestRate = 0.05;
@@ -21,8 +21,8 @@ public class SavingsAccount extends Account {
     }
 
     // Constructor with default interest rate 2%
-    public SavingsAccount(User owner, Currency currency) {
-        super(owner, currency);
+    public SavingsAccount(String ownerId, Currency currency) {
+        super(ownerId, currency);
         this.interestRate = 0.02;
     }
 
@@ -39,7 +39,7 @@ public class SavingsAccount extends Account {
         return  "----------------------------------------\n" +
                 "💳 SavingsAccount\n" +
                 "• IBAN:        " + getIban() + "\n" +
-                "• Owner:       " + getOwner().getName() + "\n" +
+                "• Owner ID:       " + getUserId() + "\n" +
                 "• Balance:     💰 " + String.format("%.2f", getBalance()) + " " + getCurrency() + "\n" +
                 "• Interest:    " + interestRate + "\n" +
                 "• Active:      " + (isActive() ? "🔓 YES" : "🔒 NO") + "\n" +

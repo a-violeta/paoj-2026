@@ -1,6 +1,8 @@
 package com.pao.project.bank.model;
 
 import com.pao.project.bank.model.account.Account;
+import com.pao.project.bank.service.UserService;
+
 import java.time.LocalDate;
 import java.util.Random;
 
@@ -9,45 +11,47 @@ public class Card {
     private final ImmutableIdentifier cardNumber;      // 16 digits
     private final String cvv;             // 3 digits
     private final LocalDate expirationDate;
-    private final User owner;
-    private final Account account;
+    //private final User owner;
+    //private final Account account;
+    // should have also:
+    private final String userId;
+    private final String accountIban;
+
     private boolean active;
     private CardType type;
 
     public Card(
-            ImmutableIdentifier cardNumber,
+            String cardNumber,
             String cvv,
             LocalDate expirationDate,
-            User owner,
-            Account account,
+            String userId,
+            String accountIban,
             boolean active,
             CardType type
     ) {
-        this.cardNumber = cardNumber;
+        this.cardNumber = new ImmutableIdentifier(cardNumber);
         this.cvv = cvv;
         this.expirationDate = expirationDate;
-        this.owner = owner;
-        this.account = account;
+        this.userId = userId;
+        this.accountIban = accountIban;
         this.active = active;
         this.type = type;
     }
 
-    public Card(User owner, Account account, CardType type) {
-        if (account == null || owner == null || type == null) {
+    public Card(String ownerId, String accountIban, CardType type) {
+        if (accountIban == null || ownerId == null || type == null || ownerId.isBlank() || accountIban.isBlank()) {
             throw new IllegalArgumentException("Account, owner and type cannot be null.");
-        }
-
-        if (!account.isActive()) {
-            throw new IllegalStateException("Cannot create a card for an inactive account.");
         }
 
         this.cardNumber = new ImmutableIdentifier(generateCardNumber());
         this.cvv = generateCvv();
         this.expirationDate = LocalDate.now().plusYears(5);
-        this.owner = owner;
-        this.account = account;
+        //this.owner = owner;
+        //this.account = account;
         this.active = true;
         this.type = type;
+        this.accountIban = accountIban;
+        this.userId = ownerId;
     }
 
     private String generateCardNumber() {
@@ -83,20 +87,20 @@ public class Card {
         return expirationDate;
     }
 
-    public User getOwner() {
-        return owner;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
     public boolean isActive() {
         return active;
     }
 
     public CardType getType() {
         return type;
+    }
+
+    public String getAccountIban() {
+        return accountIban;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public void setActive(boolean newActive){
@@ -108,8 +112,8 @@ public class Card {
         return  "----------------------------------------\n" +
                 "🪪 Card (" + type + ")\n" +
                 "• Number:      " + cardNumber + "\n" +
-                "• Owner:       " + owner.getName() + "\n" +
-                "• Account:     " + account.getIban() + "\n" +
+                "• Owner ID:       " + userId + "\n" +
+                "• Account:     " + accountIban + "\n" +
                 "• Active:      " + (active ? "🔓 YES" : "🔒 NO") + "\n" +
                 "----------------------------------------";
     }

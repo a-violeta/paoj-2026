@@ -2,6 +2,7 @@ package com.pao.project.bank.service;
 
 import com.pao.project.bank.model.account.Account;
 import com.pao.project.bank.model.Card;
+import com.pao.project.bank.repository.AccountRepository;
 import com.pao.project.bank.repository.CardRepository;
 import com.pao.project.bank.util.DatabaseConnection;
 
@@ -28,6 +29,12 @@ public class CardService {
     public void addCard(Card card) {
         if(card == null) return;
 
+        Account acc = AccountService.getInstance().findAccountByIban(card.getAccountIban());
+
+        if(!acc.isActive()){
+            throw new IllegalStateException("Cannot create a card for an inactive account.");
+        }
+
         Connection conn = null;
 
         try {
@@ -35,10 +42,11 @@ public class CardService {
             conn.setAutoCommit(false);
 
             // pt logica din memorie
-            card.getOwner().addCard(card);
+            //card.getOwner().addCard(card);
 
             cardRepository.save(card, conn);
             conn.commit();
+            AuditService.getInstance().logAction("add_card");
         } catch (Exception e) {
 
             try {
@@ -73,9 +81,10 @@ public class CardService {
             conn.setAutoCommit(false);
 
             cardRepository.delete(card.getCardNumber().toString(), conn);
-            card.getOwner().getCards().remove(card);
+            //card.getOwner().getCards().remove(card);
 
             conn.commit();
+            AuditService.getInstance().logAction("delete_card");
         } catch (Exception e) {
 
             try {
@@ -137,6 +146,7 @@ public class CardService {
             cardRepository.update(card, conn);
 
             conn.commit();
+            AuditService.getInstance().logAction("deactivate_card");
         } catch (Exception e) {
 
             try {
@@ -163,7 +173,7 @@ public class CardService {
 
     public void deactivateCardsForAccount(Account account) {
         for (Card c : getAllCards()) {
-            if (c.getAccount().equals(account) && c.isActive()) {
+            if (c.getAccountIban().equals(account.getIban()) && c.isActive()) {
 
                 Connection conn =null;
 
@@ -176,6 +186,7 @@ public class CardService {
                     System.out.println("   → Card " + c.getCardNumber() + " has been deactivated automatically.");
 
                     conn.commit();
+                    AuditService.getInstance().logAction("deactivate_card");
                 } catch (Exception e) {
 
                     try {
@@ -201,5 +212,4 @@ public class CardService {
             }
         }
     }
-
 }

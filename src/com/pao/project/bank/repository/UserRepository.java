@@ -1,6 +1,7 @@
 package com.pao.project.bank.repository;
 
 import com.pao.project.bank.model.User;
+import com.pao.project.bank.model.account.Account;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.Optional;
 public class UserRepository {
 
     // MAPPING DB -> OBJECT
-    private User mapRow(ResultSet rs) throws SQLException {
+    private User mapRow(ResultSet rs, Connection conn) throws SQLException {
         User user = new User(
                 rs.getString("id"),
                 rs.getString("name"),
@@ -36,8 +37,6 @@ public class UserRepository {
 
             ps.executeUpdate();
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -51,7 +50,7 @@ public class UserRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapRow(rs));
+                    return Optional.of(mapRow(rs, conn));
                 }
                 return Optional.empty();
             }
@@ -68,7 +67,7 @@ public class UserRepository {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                list.add(mapRow(rs));
+                list.add(mapRow(rs, conn));
             }
         }
         return list;
@@ -87,8 +86,6 @@ public class UserRepository {
 
             ps.executeUpdate();
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
