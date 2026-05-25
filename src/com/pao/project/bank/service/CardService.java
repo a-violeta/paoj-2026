@@ -101,17 +101,23 @@ public class CardService {
     }
 
     public Card findCardByNumber(String number) {
-
+        Connection conn = null;
         try{
-            return cardRepository.findByNumber(number).orElse(null);
+            conn=DatabaseConnection.getInstance().getConnection();
+
+            return cardRepository.findByNumber(number, conn).orElse(null);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public List<Card> getAllCards() {
+        Connection conn = null;
+
         try{
-            return cardRepository.findAll();
+            conn=DatabaseConnection.getInstance().getConnection();
+
+            return cardRepository.findAll(conn);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

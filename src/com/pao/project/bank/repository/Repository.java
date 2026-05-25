@@ -1,4 +1,4 @@
-package com.pao.laboratory12.repository;
+package com.pao.project.bank.repository;
 
 import java.sql.SQLException;
 import java.util.List;

@@ -108,16 +108,24 @@ public class UserService {
     public User findUserById(String id){
         if (id == null || id.isBlank()) return null;
 
+        Connection conn = null;
+
         try{
-            return userRepository.findById(id).orElse(null);
+            conn=DatabaseConnection.getInstance().getConnection();
+
+            return userRepository.findById(id, conn).orElse(null);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public List<User> getAllUsers() {
+        Connection conn=null;
+
         try{
-            return userRepository.findAll();
+            conn=DatabaseConnection.getInstance().getConnection();
+
+            return userRepository.findAll(conn);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

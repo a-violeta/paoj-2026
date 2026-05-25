@@ -9,6 +9,7 @@ import com.pao.project.bank.repository.TransactionRepository;
 import com.pao.project.bank.util.DatabaseConnection;
 
 import javax.xml.crypto.Data;
+import java.net.ConnectException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -300,8 +301,12 @@ public class TransactionService {
     }
 
     public List<Transaction> getAllTransactions() {
+        Connection conn = null;
+
         try{
-            return transactionRepository.findAll();
+            conn=DatabaseConnection.getInstance().getConnection();
+
+            return transactionRepository.findAll(conn);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -357,8 +362,12 @@ public class TransactionService {
     }
 
     public Transaction findTransactionById(String id) {
+        Connection conn = null;
+
         try {
-            return transactionRepository.findById(id).orElse(null);
+            conn=DatabaseConnection.getInstance().getConnection();
+
+            return transactionRepository.findById(id, conn).orElse(null);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

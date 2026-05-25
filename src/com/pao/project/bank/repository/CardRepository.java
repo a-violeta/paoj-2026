@@ -2,9 +2,7 @@ package com.pao.project.bank.repository;
 
 import com.pao.project.bank.model.*;
 import com.pao.project.bank.model.account.Account;
-import com.pao.project.bank.util.DatabaseConnection;
 
-import java.io.IOException;
 import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -12,9 +10,7 @@ import java.util.*;
 
 public class CardRepository {
 
-    // ===========
     // MAPPING
-    // ===========
     private Card mapRow(ResultSet rs) throws SQLException {
 
         String number = rs.getString("card_number");
@@ -38,9 +34,7 @@ public class CardRepository {
         );
     }
 
-    // ===========
     // SAVE
-    // ===========
     public void save(Card card, Connection conn) throws SQLException {
         String sql = """
             INSERT INTO cards
@@ -65,9 +59,7 @@ public class CardRepository {
         }
     }
 
-    // ==============
     // FIND BY NUMBER
-    // ==============
     public Optional<Card> findByNumber(String number, Connection conn) throws SQLException {
         String sql = "SELECT * FROM cards WHERE card_number = ?";
 
@@ -78,13 +70,10 @@ public class CardRepository {
                 if (rs.next()) return Optional.of(mapRow(rs));
                 return Optional.empty();
             }
-
         }
     }
 
-    // =============
-    // LIST ALL
-    // =============
+    // FIND ALL
     public List<Card> findAll(Connection conn) throws SQLException {
         List<Card> list = new ArrayList<>();
         String sql = "SELECT * FROM cards";
@@ -95,15 +84,11 @@ public class CardRepository {
             while (rs.next()) {
                 list.add(mapRow(rs));
             }
-
         }
-
         return list;
     }
 
-    // =========================
-    // UPDATE (doar active + type)
-    // =========================
+    // UPDATE (only active + type)
     public void update(Card card, Connection conn) throws SQLException {
         String sql = """
             UPDATE cards
@@ -123,9 +108,7 @@ public class CardRepository {
         }
     }
 
-    // ==========
     // DELETE
-    // ==========
     public void delete(String cardNumber, Connection conn) throws SQLException {
         String sql = "DELETE FROM cards WHERE card_number = ?";
 
@@ -138,9 +121,7 @@ public class CardRepository {
         }
     }
 
-    // ============
     // PLACEHOLDERS
-    // ============
     private static class UserPlaceholder extends User {
         public UserPlaceholder(String id) {
             super("temp", "temp@mail.com", "000");

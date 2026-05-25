@@ -3,9 +3,7 @@ package com.pao.project.bank.repository;
 import com.pao.project.bank.model.Currency;
 import com.pao.project.bank.model.User;
 import com.pao.project.bank.model.account.*;
-import com.pao.project.bank.util.DatabaseConnection;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +11,7 @@ import java.util.Optional;
 
 public class AccountRepository {
 
-    // =============
     // MAPPING
-    // =============
     private Account mapRow(ResultSet rs) throws SQLException {
         String type = rs.getString("type");
 
@@ -48,16 +44,14 @@ public class AccountRepository {
         account.setCurrency(Currency.valueOf(rs.getString("currency")));
         account.setActive(rs.getBoolean("active"));
 
-        // user minimal (ID + eventual name)
+        // minimal user (ID + maybe name)
         User owner = new UserPlaceholder(rs.getString("user_id"));
         account.setOwner(owner);
 
         return account;
     }
 
-    // ===============
     // SAVE
-    // ===============
     public void save(Account account, Connection conn) throws SQLException {
         String sql = """
             INSERT INTO accounts
@@ -109,9 +103,7 @@ public class AccountRepository {
         }
     }
 
-    // ================
     // FIND BY IBAN
-    // ================
     public Optional<Account> findByIban(String iban, Connection conn) throws SQLException {
         String sql = "SELECT * FROM accounts WHERE iban = ?";
 
@@ -125,9 +117,7 @@ public class AccountRepository {
         }
     }
 
-    // ===============
-    // LIST ALL
-    // ===============
+    // FIND ALL
     public List<Account> findAll(Connection conn) throws SQLException {
         String sql = "SELECT * FROM accounts";
 
@@ -139,15 +129,11 @@ public class AccountRepository {
             while (rs.next()) {
                 list.add(mapRow(rs));
             }
-
         }
-
         return list;
     }
 
-    // ===============
     // UPDATE
-    // ===============
     public void update(Account account, Connection conn) throws SQLException {
         String sql = """
             UPDATE accounts
@@ -165,23 +151,20 @@ public class AccountRepository {
         }
     }
 
-    // ===============
     // DELETE
-    // ===============
     public void delete(String iban, Connection conn) throws SQLException {
         String sql = "DELETE FROM accounts WHERE iban = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, iban);
             ps.executeUpdate();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    // ================
-    // helper minimal user
-    // ================
+    // minimal user helper
     private static class UserPlaceholder extends User {
         public UserPlaceholder(String id) {
             super("temp", "temp@mail.com", "000");

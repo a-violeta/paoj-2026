@@ -128,16 +128,25 @@ public class AccountService {
     }
 
     public Account findAccountByIban(String iban) {
+        Connection conn = null;
         try{
-            return accountRepository.findByIban(iban).orElse(null);
+            conn=DatabaseConnection.getInstance().getConnection();
+            //conn.setAutoCommit(false);
+
+            return accountRepository.findByIban(iban, conn).orElse(null);
+            //conn.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public List<Account> getAllAccounts() {
+        Connection conn= null;
         try{
-            return accountRepository.findAll();
+            conn=DatabaseConnection.getInstance().getConnection();
+            //conn.setAutoCommit(false);
+
+            return accountRepository.findAll(conn);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

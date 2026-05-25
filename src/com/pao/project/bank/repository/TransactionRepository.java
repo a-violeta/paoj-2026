@@ -2,18 +2,13 @@ package com.pao.project.bank.repository;
 
 import com.pao.project.bank.model.account.Account;
 import com.pao.project.bank.model.transaction.*;
-import com.pao.project.bank.util.DatabaseConnection;
 
-import java.io.IOException;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class TransactionRepository {
 
-    // =============
     // SAVE
-    // =============
     public void save(Transaction tx, Connection conn) throws SQLException {
 
         String sql = """
@@ -53,13 +48,10 @@ public class TransactionRepository {
             }
 
             ps.executeUpdate();
-
         }
     }
 
-    // ===============
     // FIND BY ID
-    // ===============
     public Optional<Transaction> findById(String id, Connection conn) throws SQLException {
 
         String sql = "SELECT * FROM transactions WHERE id = ?";
@@ -72,13 +64,10 @@ public class TransactionRepository {
                 if (!rs.next()) return Optional.empty();
                 return Optional.of(mapRow(rs));
             }
-
         }
     }
 
-    // ===============
-    // LIST ALL
-    // ===============
+    // FIND ALL
     public List<Transaction> findAll(Connection conn) throws SQLException {
 
         List<Transaction> list = new ArrayList<>();
@@ -95,9 +84,7 @@ public class TransactionRepository {
         return list;
     }
 
-    // =============
     // DELETE
-    // =============
     public void delete(String id, Connection conn) throws SQLException {
 
         String sql = "DELETE FROM transactions WHERE id = ?";
@@ -105,13 +92,10 @@ public class TransactionRepository {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, id);
             ps.executeUpdate();
-
         }
     }
 
-    // =================
-    // MAPPING (SIMPLU)
-    // =================
+    // MAPPING (SIMPLE)
     private Transaction mapRow(ResultSet rs) throws SQLException {
 
         String type = rs.getString("type");

@@ -1,9 +1,7 @@
 package com.pao.project.bank.repository;
 
 import com.pao.project.bank.model.User;
-import com.pao.project.bank.util.DatabaseConnection;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +9,7 @@ import java.util.Optional;
 
 public class UserRepository {
 
-    // -------------------------
     // MAPPING DB -> OBJECT
-    // -------------------------
     private User mapRow(ResultSet rs) throws SQLException {
         User user = new User(
                 rs.getString("id"),
@@ -22,14 +18,12 @@ public class UserRepository {
                 rs.getString("phone")
         );
 
-        // suprascriu id ul generat in Java cu cel din DB
-        // DAR: id este final -> nu are setter
+        // overwrite the generated id from Java with the one from DB
+        // id is final -> no setter available
         return user;
     }
 
-    // -------------------------
     // CREATE
-    // -------------------------
     public void save(User user, Connection conn) throws SQLException {
         String sql = "INSERT INTO users (id, name, email, phone) VALUES (?, ?, ?, ?)";
 
@@ -47,9 +41,7 @@ public class UserRepository {
         }
     }
 
-    // -------------------------
-    // READ BY ID
-    // -------------------------
+    // FIND BY ID
     public Optional<User> findById(String id, Connection conn) throws SQLException {
         String sql = "SELECT id, name, email, phone FROM users WHERE id = ?";
 
@@ -66,9 +58,7 @@ public class UserRepository {
         }
     }
 
-    // -------------------------
-    // READ ALL
-    // -------------------------
+    // FIND ALL
     public List<User> findAll(Connection conn) throws SQLException {
         String sql = "SELECT id, name, email, phone FROM users ORDER BY name";
 
@@ -80,15 +70,11 @@ public class UserRepository {
             while (rs.next()) {
                 list.add(mapRow(rs));
             }
-
         }
-
         return list;
     }
 
-    // -------------------------
     // UPDATE
-    // -------------------------
     public void update(User user, Connection conn) throws SQLException {
         String sql = "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?";
 
@@ -106,9 +92,7 @@ public class UserRepository {
         }
     }
 
-    // -------------------------
     // DELETE
-    // -------------------------
     public void delete(String id, Connection conn) throws SQLException {
         String sql = "DELETE FROM users WHERE id = ?";
 
@@ -116,7 +100,6 @@ public class UserRepository {
 
             ps.setString(1, id);
             ps.executeUpdate();
-
         }
     }
 }
