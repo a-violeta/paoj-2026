@@ -391,4 +391,13 @@ public class TransactionService {
             throw new RuntimeException(e);
         }
     }
+
+    public List<String> getTransactionsWithUsers(String iban) {
+        try {
+            Connection conn = DatabaseConnection.getInstance().getConnection();
+            return transactionRepository.getTransactionsWithUsers(iban, conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

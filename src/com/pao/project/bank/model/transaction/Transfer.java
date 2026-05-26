@@ -16,4 +16,16 @@ public class Transfer extends Transaction{
             throw new IllegalArgumentException("Cannot transfer to the same account");
         }
     }
+
+    @Override
+    public String toString() {
+        return "----------------------------------------\n" +
+                "🔄 Transfer\n" +
+                "• ID:          " + getId() + "\n" +
+                "• Timestamp:   " + getTimestamp() + "\n" +
+                "• Amount:      💰 " + getAmount() + "\n" +
+                "• From:        " + getSourceIban() + "\n" +
+                "• To:          " + getDestinationIban() + "\n" +
+                "----------------------------------------";
+    }
 }

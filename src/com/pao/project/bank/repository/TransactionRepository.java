@@ -25,8 +25,8 @@ public class TransactionRepository {
             if (tx instanceof Deposit) {
                 ps.setString(3, "DEPOSIT");
                 ps.setNull(4, Types.NUMERIC);
-                ps.setNull(5, Types.VARCHAR);
-                ps.setString(6, tx.getDestinationIban());
+                ps.setString(5, tx.getSourceIban());
+                ps.setNull(6, Types.VARCHAR);
 
             } else if (tx instanceof Withdrawal) {
                 ps.setString(3, "WITHDRAWAL");
@@ -34,15 +34,15 @@ public class TransactionRepository {
                 ps.setString(5, tx.getSourceIban());
                 ps.setNull(6, Types.VARCHAR);
 
-            } else if (tx instanceof Transfer) {
-                ps.setString(3, "TRANSFER");
-                ps.setNull(4, Types.NUMERIC);
-                ps.setString(5, tx.getSourceIban());
-                ps.setString(6, tx.getDestinationIban());
-
             } else if (tx instanceof InternationalTransfer it) {
                 ps.setString(3, "INTERNATIONAL_TRANSFER");
                 ps.setDouble(4, it.getFee());
+                ps.setString(5, tx.getSourceIban());
+                ps.setString(6, tx.getDestinationIban());
+
+            } else if (tx instanceof Transfer) {
+                ps.setString(3, "TRANSFER");
+                ps.setNull(4, Types.NUMERIC);
                 ps.setString(5, tx.getSourceIban());
                 ps.setString(6, tx.getDestinationIban());
             }
@@ -124,18 +124,52 @@ public class TransactionRepository {
         };
     }
 
-    // simple reference wrapper (no fake Account inheritance)
-    private static class AccountRef {
-        String iban;
+    public List<String> getTransactionsWithUsers(String iban, Connection conn) throws SQLException {
 
-        AccountRef(String iban) {
-            this.iban = iban;
+        String sql = """
+            SELECT 
+                t.id,
+                t.amount,
+                t.type,
+                t.source_iban,
+                t.destination_iban,
+                u.name AS user_name
+            FROM transactions t
+            JOIN users u 
+                ON u.id = (
+                    SELECT a.user_id 
+                    FROM accounts a 
+                    WHERE a.iban = t.source_iban
+                    LIMIT 1
+                )
+            WHERE t.source_iban = ? OR t.destination_iban = ?
+            ORDER BY t.timestamp DESC
+        """;
+
+        List<String> result = new ArrayList<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, iban);
+            ps.setString(2, iban);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+
+                    result.add(
+                            "----------------------------------------\n" +
+                                    "💸 TRANSACTION ID: " + rs.getString("id") + "\n" +
+                                    "👤 User:           " + rs.getString("user_name") + "\n" +
+                                    "📌 Type:           " + rs.getString("type") + "\n" +
+                                    "💰 Amount:         " + rs.getDouble("amount") + "\n" +
+                                    "➡ From:            " + rs.getString("source_iban") + "\n" +
+                                    "⬅ To:              " + rs.getString("destination_iban") + "\n" +
+                                    "----------------------------------------"
+                    );
+                }
+            }
         }
 
-        Account toAccount() {
-            Account acc = new Account() {};
-            acc.setIban(iban);
-            return acc;
-        }
+        return result;
     }
 }

@@ -63,23 +63,6 @@ public abstract class Account implements Comparable<Account> {
         balance -= amount;
     }
 
-    public void changeCurrency(Currency newCurrency) {
-        if (newCurrency == null) {
-            throw new IllegalArgumentException("Currency cannot be null.");
-        }
-        if (!active){
-            throw new InactiveAccountException("⚠️ Account is not active.");
-        }
-        if (newCurrency == this.currency) {
-            throw new IllegalCurrencyException("⚠️ Account is already in " + newCurrency);
-        }
-
-        double newBalance = CurrencyConverter.convert(this.balance, this.currency, newCurrency);
-
-        this.balance = newBalance;
-        this.currency = newCurrency;
-    }
-
     //----------------------------
     //get, set, toString, equals, hashCode, compareTo
     //----------------------------
@@ -160,6 +143,5 @@ public abstract class Account implements Comparable<Account> {
     public void setBalance(double balance) {
         this.balance = balance;
     }
-
 }
 

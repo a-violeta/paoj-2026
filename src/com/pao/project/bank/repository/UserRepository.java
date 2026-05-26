@@ -99,4 +99,37 @@ public class UserRepository {
             ps.executeUpdate();
         }
     }
+
+    public List<String> getUsersWithStats(Connection conn) throws SQLException {
+
+        String sql = """
+        SELECT 
+            u.id,
+            u.name,
+            COUNT(DISTINCT a.iban) AS accounts_count,
+            COUNT(DISTINCT c.card_number) AS cards_count
+        FROM users u
+        LEFT JOIN accounts a ON u.id = a.user_id
+        LEFT JOIN cards c ON a.iban = c.iban
+        GROUP BY u.id, u.name
+    """;
+
+        List<String> result = new ArrayList<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                result.add(
+                        "----------------------------------------\n" +
+                                "👤 USER: " + rs.getString("name") + "\n" +
+                                "----------------------------------------\n" +
+                                "🏦 Accounts: " + rs.getInt("accounts_count") + "\n" +
+                                "💳 Cards:    " + rs.getInt("cards_count") + "\n"
+                );
+            }
+        }
+
+        return result;
+    }
 }

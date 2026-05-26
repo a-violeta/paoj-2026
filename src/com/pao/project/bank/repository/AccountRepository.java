@@ -133,19 +133,54 @@ public class AccountRepository {
 
     // UPDATE
     public void update(Account account, Connection conn) throws SQLException {
+
         String sql = """
-            UPDATE accounts
-            SET balance = ?, active = ?
-            WHERE iban = ?
-        """;
+        UPDATE accounts
+        SET balance = ?, 
+            currency = ?, 
+            active = ?,
+            overdraft_limit = ?,
+            interest_rate = ?,
+            loan_amount = ?,
+            remaining_amount = ?,
+            due_date = ?
+        WHERE iban = ?
+    """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setDouble(1, account.getBalance());
-            ps.setBoolean(2, account.isActive());
-            ps.setString(3, account.getIban());
+            ps.setString(2, account.getCurrency().name());
+            ps.setBoolean(3, account.isActive());
+
+            if (account instanceof CheckingAccount acc) {
+
+                ps.setDouble(4, acc.getOverdraftLimit());
+                ps.setNull(5, Types.NUMERIC);
+                ps.setNull(6, Types.NUMERIC);
+                ps.setNull(7, Types.NUMERIC);
+                ps.setNull(8, Types.DATE);
+
+            } else if (account instanceof SavingsAccount acc) {
+
+                ps.setNull(4, Types.NUMERIC);
+                ps.setDouble(5, acc.getInterestRate());
+                ps.setNull(6, Types.NUMERIC);
+                ps.setNull(7, Types.NUMERIC);
+                ps.setNull(8, Types.DATE);
+
+            } else if (account instanceof LoanAccount acc) {
+
+                ps.setNull(4, Types.NUMERIC);
+                ps.setDouble(5, acc.getInterestRate());
+                ps.setDouble(6, acc.getLoanAmount());
+                ps.setDouble(7, acc.getRemainingAmount());
+                ps.setDate(8, Date.valueOf(acc.getDueDate()));
+            }
+
+            ps.setString(9, account.getIban());
+
             ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -180,5 +215,40 @@ public class AccountRepository {
             }
         }
         return list;
+    }
+
+    public List<String> getAccountsWithCards(Connection conn) throws SQLException {
+
+        String sql = """
+        SELECT 
+            a.iban,
+            a.balance,
+            c.card_number,
+            c.active,
+            u.name
+        FROM accounts a
+        LEFT JOIN cards c ON a.iban = c.iban
+        LEFT JOIN users u on a.user_id = u.id
+        ORDER BY a.iban
+    """;
+
+        List<String> result = new ArrayList<>();
+
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                result.add(
+                        "----------------------------------------\n" +
+                                "🏦 IBAN:    " + rs.getString("iban") + "\n" +
+                                "👤 User:    " + rs.getString("name") + "\n" +
+                                "💰 Balance: " + rs.getDouble("balance") + "\n" +
+                                "💳 Card:    " + (rs.getString("card_number") != null ? rs.getString("card_number") : "NONE") + "\n" +
+                                "----------------------------------------"
+                );
+            }
+        }
+
+        return result;
     }
 }

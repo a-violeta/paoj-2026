@@ -13,9 +13,15 @@ public class InternationalTransfer extends Transfer {
 
     @Override
     public String toString() {
-        return super.toString() +
-                " (International, " +
-                "fee=" + fee + ")";
+        return "----------------------------------------\n" +
+                "🌍 International Transfer\n" +
+                "• ID:          " + getId() + "\n" +
+                "• Timestamp:   " + getTimestamp() + "\n" +
+                "• Amount:      💰 " + getAmount() + "\n" +
+                "• From:        " + getSourceIban() + "\n" +
+                "• To:          " + getDestinationIban() + "\n" +
+                "• Fee:         💸 " + fee + "\n" +
+                "----------------------------------------";
     }
 
     public double getFee() {

@@ -138,7 +138,7 @@ public class Main {
                                 System.out.println("Savings account created.");
                             }
                             case 2 -> {
-                                CheckingAccount ca = new CheckingAccount(owner.getId(), Currency.RON);
+                                CheckingAccount ca = new CheckingAccount(owner.getId(), Currency.EUR);
                                 //owner.addAccount(ca);
                                 accountService.addAccount(ca);
                                 System.out.println("Checking account created.");
@@ -236,12 +236,35 @@ public class Main {
 
                     case 4 -> {
                         System.out.println("=== USERS ===");
+
                         if (userService.getAllUsers().isEmpty()) {
                             System.out.println("⚠️ No users found. Create a user first.");
                             break;
                         }
-                        for (User u : userService.getAllUsers()) {
-                            System.out.println(u);
+
+                        System.out.println("Choose simple or detailed list:");
+                        System.out.println("1. simple");
+                        System.out.println("2. detailed");
+                        int type = scanner.nextInt();
+                        if (type != 1 && type != 2){
+                            System.out.println("⚠️ Invalid type!");
+                            break;
+                        }
+                        switch (type){
+                            case 1 -> {
+                                for (User u : userService.getAllUsers()) {
+                                    System.out.println(u);
+                                }
+                            }
+                            case 2 -> {
+                                try {
+                                    for (String s : userService.getUsersWithStats()) {
+                                        System.out.println(s);
+                                    }
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
                         }
                     }
 
@@ -257,8 +280,30 @@ public class Main {
                         }
 
                         Collections.sort(accounts);
-                        for (Account a : accounts) {
-                            System.out.println(a);
+
+                        System.out.println("Choose simple or detailed list:");
+                        System.out.println("1. simple");
+                        System.out.println("2. detailed");
+                        int type = scanner.nextInt();
+                        if (type != 1 && type != 2){
+                            System.out.println("⚠️ Invalid type!");
+                            break;
+                        }
+                        switch (type){
+                            case 1 -> {
+                                for (Account a : accounts) {
+                                    System.out.println(a);
+                                }
+                            }
+                            case 2 -> {
+                                try {
+                                    for (String s : accountService.getAccountsWithCards()) {
+                                        System.out.println(s);
+                                    }
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
                         }
                     }
 
@@ -268,6 +313,7 @@ public class Main {
                             System.out.println("⚠️ No cards found. Create a card first.");
                             break;
                         }
+
                         for (Card c : cardService.getAllCards()) {
                             System.out.println(c);
                         }
@@ -294,8 +340,29 @@ public class Main {
                             break;
                         }
 
-                        for (Transaction t : history) {
-                            System.out.println(t); // uses toString()
+                        System.out.println("Choose simple or detailed list:");
+                        System.out.println("1. simple");
+                        System.out.println("2. detailed");
+                        int type = scanner.nextInt();
+                        if (type != 1 && type != 2){
+                            System.out.println("⚠️ Invalid type!");
+                            break;
+                        }
+                        switch (type){
+                            case 1 -> {
+                                for (Transaction t : history) {
+                                    System.out.println(t); // uses toString()
+                                }
+                            }
+                            case 2 -> {
+                                try {
+                                    for (String t : transactionService.getTransactionsWithUsers(account.getIban())) {
+                                        System.out.println(t);
+                                    }
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
                         }
                     }
 
@@ -529,7 +596,7 @@ public class Main {
                         if (newCurrency == null) break;
 
                         try {
-                            account.changeCurrency(newCurrency);
+                            accountService.changeCurrency(account, newCurrency);
                             System.out.println("✔ Currency successfully changed!");
                             System.out.println("New balance: " + account.getBalance() + " " + newCurrency);
                         } catch (InactiveAccountException | IllegalCurrencyException e) {

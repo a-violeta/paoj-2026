@@ -1,8 +1,5 @@
 package com.pao.project.bank.model;
 
-import com.pao.project.bank.model.account.Account;
-import com.pao.project.bank.service.UserService;
-
 import java.time.LocalDate;
 import java.util.Random;
 

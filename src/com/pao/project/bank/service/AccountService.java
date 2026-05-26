@@ -1,8 +1,11 @@
 package com.pao.project.bank.service;
 
+import com.pao.project.bank.exception.IllegalCurrencyException;
 import com.pao.project.bank.exception.InactiveAccountException;
 import com.pao.project.bank.exception.NullAccountException;
 import com.pao.project.bank.model.Card;
+import com.pao.project.bank.model.Currency;
+import com.pao.project.bank.model.CurrencyConverter;
 import com.pao.project.bank.model.account.Account;
 import com.pao.project.bank.model.account.SavingsAccount;
 import com.pao.project.bank.model.account.LoanAccount;
@@ -172,7 +175,6 @@ public class AccountService {
         if (account == null) {
             throw new NullAccountException("Cannot deactivate a null account.");
         }
-
         if (!account.isActive()) {
             throw new InactiveAccountException("Account " + account.getIban() + " is already inactive.");
         }
@@ -190,7 +192,7 @@ public class AccountService {
             System.out.println("✔ Account " + account.getIban() + " has been deactivated.");
 
             // and the cards too
-            CardService.getInstance().deactivateCardsForAccount(account);
+            CardService.getInstance().deactivateCardsForAccount(account, conn);
             conn.commit();
             AuditService.getInstance().logAction("deactivate_account");
         } catch (Exception e) {
@@ -292,6 +294,73 @@ public class AccountService {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void changeCurrency(Account account, Currency newCurrency) {
+
+        if (newCurrency == null) {
+            throw new IllegalArgumentException("Currency cannot be null.");
+        }
+        if (!account.isActive()) {
+            throw new InactiveAccountException("⚠️ Account is not active.");
+        }
+        if (newCurrency == account.getCurrency()) {
+            throw new IllegalCurrencyException(
+                    "⚠️ Account is already in " + newCurrency
+            );
+        }
+
+        Connection conn = null;
+
+        try {
+            conn = DatabaseConnection.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            double newBalance = CurrencyConverter.convert(
+                    account.getBalance(),
+                    account.getCurrency(),
+                    newCurrency
+            );
+
+            account.setBalance(newBalance);
+            account.setCurrency(newCurrency);
+
+            accountRepository.update(account, conn);
+            conn.commit();
+
+            AuditService.getInstance().logAction("change_account_currency");
+
+        } catch (Exception e) {
+
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            throw new RuntimeException(e);
+
+        } finally {
+
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public List<String> getAccountsWithCards() {
+        try {
+            Connection conn = DatabaseConnection.getInstance().getConnection();
+            return accountRepository.getAccountsWithCards(conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }

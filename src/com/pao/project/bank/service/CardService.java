@@ -171,43 +171,20 @@ public class CardService {
         }
     }
 
-    public void deactivateCardsForAccount(Account account) {
+    public void deactivateCardsForAccount(Account account, Connection conn) {
         for (Card c : getAllCards()) {
             if (c.getAccountIban().equals(account.getIban()) && c.isActive()) {
 
-                Connection conn =null;
-
                 try {
-                    conn=DatabaseConnection.getInstance().getConnection();
-                    conn.setAutoCommit(false);
-
-                    cardRepository.update(c, conn);
                     c.setActive(false);
+                    cardRepository.update(c, conn);
+
                     System.out.println("   → Card " + c.getCardNumber() + " has been deactivated automatically.");
 
-                    conn.commit();
                     AuditService.getInstance().logAction("deactivate_card");
+
                 } catch (Exception e) {
-
-                    try {
-                        if (conn != null) {
-                            conn.rollback();
-                        }
-                    } catch (SQLException ex) {
-                        ex.printStackTrace();
-                    }
-
                     throw new RuntimeException(e);
-
-                } finally {
-
-                    try {
-                        if (conn != null) {
-                            conn.setAutoCommit(true);
-                        }
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         }

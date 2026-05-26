@@ -136,4 +136,13 @@ public class UserService {
             throw new RuntimeException(e);
         }
     }
+
+    public List<String> getUsersWithStats() {
+        try {
+            Connection conn = DatabaseConnection.getInstance().getConnection();
+            return userRepository.getUsersWithStats(conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

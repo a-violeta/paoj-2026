@@ -101,13 +101,8 @@ public abstract class Transaction {
 
     @Override
     public String toString() {
-        String title =
-                type == TransactionType.DEPOSIT ? "➕ Deposit" :
-                        type == TransactionType.WITHDRAWAL ? "➖ Withdrawal" :
-                                "🔄 Transfer";
-
-        return  "----------------------------------------\n" +
-                title + "\n" +
+        return "----------------------------------------\n" +
+                "Transaction\n" +
                 "• ID:          " + id + "\n" +
                 "• Timestamp:   " + timestamp + "\n" +
                 "• Amount:      💰 " + amount + "\n" +
