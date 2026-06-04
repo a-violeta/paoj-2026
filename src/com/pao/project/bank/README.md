@@ -67,3 +67,5 @@ Sorted collection: `List<Account>` sorted in `Main` menu option `5`, using `Coll
 13. `Deactivate card`
 14. `Change account currency`
 15. `Change interest rate for account`
+
+Cele 3 `JOIN`-uri sunt in `repository/AccountRepository`, `repository/TransactionRepository` si `repository/UserRepository`.
